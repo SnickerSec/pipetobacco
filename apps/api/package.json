@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "tsx watch src/index.ts",
-    "build": "npm run prisma:generate -w packages/database && npm run build -w packages/database && npm run build -w packages/types && tsc --build",
+    "build": "cd ../.. && npm run prisma:generate -w packages/database && npm run build -w packages/database && npm run build -w packages/types && cd apps/api && tsc --build",
     "start": "node dist/index.js",
     "lint": "eslint src --ext .ts"
   },
