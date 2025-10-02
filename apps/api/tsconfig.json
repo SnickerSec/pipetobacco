@@ -14,7 +14,11 @@
     "resolveJsonModule": true,
     "declaration": true,
     "declarationMap": true,
-    "sourceMap": true
+    "sourceMap": true,
+    "paths": {
+      "@ember-society/database": ["../../packages/database/dist/index.d.ts"],
+      "@ember-society/types": ["../../packages/types/dist/index.d.ts"]
+    }
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules", "dist"],
