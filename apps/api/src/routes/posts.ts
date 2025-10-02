@@ -99,9 +99,9 @@ router.post('/', authenticate, async (req: AuthRequest, res) => {
     if (clubId) {
       const membership = await prisma.clubMember.findUnique({
         where: {
-          userId_clubId: {
-            userId: authorId,
+          clubId_userId: {
             clubId,
+            userId: authorId,
           },
         },
       });

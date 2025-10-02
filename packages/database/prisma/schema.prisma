@@ -51,6 +51,7 @@ model User {
   likes                   Like[]                    @relation("UserLikes")
   clubMemberships         ClubMember[]
   createdClubs            Club[]                    @relation("ClubCreator")
+  clubInvitesSent         ClubInvite[]              @relation("ClubInviter")
   following               Follow[]                  @relation("Follower")
   followers               Follow[]                  @relation("Following")
   blockedUsers            Block[]                   @relation("Blocker")
@@ -171,10 +172,12 @@ model ClubInvite {
   createdAt DateTime @default(now())
 
   club      Club     @relation(fields: [clubId], references: [id], onDelete: Cascade)
+  inviter   User     @relation("ClubInviter", fields: [invitedBy], references: [id], onDelete: Cascade)
 
   @@index([clubId])
   @@index([email])
   @@index([token])
+  @@index([invitedBy])
 }
 
 // ============================================================================
