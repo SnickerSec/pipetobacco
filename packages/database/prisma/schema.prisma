@@ -1,0 +1,572 @@
+// Prisma Schema for The Ember Society
+// This is a foundational schema - will be expanded in Task 1.2
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================================================
+// USER & AUTHENTICATION
+// ============================================================================
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  username      String    @unique
+  password      String?   // Nullable for OAuth users
+
+  // OAuth providers
+  googleId      String?   @unique
+  facebookId    String?   @unique
+
+  // Profile information
+  displayName   String
+  bio           String?   @db.Text
+  avatarUrl     String?
+  coverPhotoUrl String?
+  location      String?
+  website       String?
+
+  // Privacy settings
+  isPrivate     Boolean   @default(false)
+
+  // Account status
+  isVerified    Boolean   @default(false)
+  isSuspended   Boolean   @default(false)
+
+  // Timestamps
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  lastLoginAt   DateTime?
+
+  // Relations
+  posts                   Post[]
+  comments                Comment[]
+  reactions               Reaction[]
+  likes                   Like[]                    @relation("UserLikes")
+  clubMemberships         ClubMember[]
+  createdClubs            Club[]                    @relation("ClubCreator")
+  following               Follow[]                  @relation("Follower")
+  followers               Follow[]                  @relation("Following")
+  blockedUsers            Block[]                   @relation("Blocker")
+  blockedBy               Block[]                   @relation("Blocked")
+  sentMessages            Message[]                 @relation("MessageSender")
+  receivedMessages        Message[]                 @relation("MessageReceiver")
+  notifications           Notification[]
+  reviews                 Review[]
+  eventRSVPs              EventRSVP[]
+  reportsMade             Report[]                  @relation("Reporter")
+  reportsReceived         Report[]                  @relation("Reported")
+  pushSubscriptions       PushSubscription[]
+  notificationPreferences NotificationPreference?
+
+  @@index([email])
+  @@index([username])
+  @@index([createdAt])
+}
+
+// User following/follower relationships
+model Follow {
+  id          String   @id @default(cuid())
+  followerId  String
+  followingId String
+  createdAt   DateTime @default(now())
+
+  follower    User     @relation("Follower", fields: [followerId], references: [id], onDelete: Cascade)
+  following   User     @relation("Following", fields: [followingId], references: [id], onDelete: Cascade)
+
+  @@unique([followerId, followingId])
+  @@index([followerId])
+  @@index([followingId])
+}
+
+// User blocking relationships
+model Block {
+  id        String   @id @default(cuid())
+  blockerId String
+  blockedId String
+  createdAt DateTime @default(now())
+
+  blocker   User     @relation("Blocker", fields: [blockerId], references: [id], onDelete: Cascade)
+  blocked   User     @relation("Blocked", fields: [blockedId], references: [id], onDelete: Cascade)
+
+  @@unique([blockerId, blockedId])
+  @@index([blockerId])
+  @@index([blockedId])
+}
+
+// ============================================================================
+// CLUBS & MEMBERSHIPS
+// ============================================================================
+
+model Club {
+  id          String   @id @default(cuid())
+  name        String
+  slug        String   @unique
+  description String?  @db.Text
+  avatarUrl   String?
+  coverUrl    String?
+
+  // Privacy
+  isPrivate   Boolean  @default(false)
+
+  // Metadata
+  creatorId   String
+  memberCount Int      @default(0)
+
+  // Timestamps
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  creator     User         @relation("ClubCreator", fields: [creatorId], references: [id], onDelete: Cascade)
+  members     ClubMember[]
+  posts       Post[]
+  events      Event[]
+  invitations ClubInvite[]
+  reviews     Review[]
+
+  @@index([creatorId])
+  @@index([slug])
+  @@index([isPrivate])
+  @@index([createdAt])
+}
+
+enum ClubRole {
+  OWNER
+  ADMIN
+  MODERATOR
+  MEMBER
+}
+
+model ClubMember {
+  id        String    @id @default(cuid())
+  clubId    String
+  userId    String
+  role      ClubRole  @default(MEMBER)
+  joinedAt  DateTime  @default(now())
+
+  club      Club      @relation(fields: [clubId], references: [id], onDelete: Cascade)
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([clubId, userId])
+  @@index([clubId])
+  @@index([userId])
+  @@index([role])
+}
+
+model ClubInvite {
+  id        String   @id @default(cuid())
+  clubId    String
+  email     String
+  invitedBy String
+  token     String   @unique
+  expiresAt DateTime
+  accepted  Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  club      Club     @relation(fields: [clubId], references: [id], onDelete: Cascade)
+
+  @@index([clubId])
+  @@index([email])
+  @@index([token])
+}
+
+// ============================================================================
+// POSTS, COMMENTS & ENGAGEMENT
+// ============================================================================
+
+enum PostType {
+  TEXT
+  IMAGE
+  VIDEO
+  LINK
+}
+
+model Post {
+  id          String     @id @default(cuid())
+  content     String     @db.Text
+  type        PostType   @default(TEXT)
+
+  // Media URLs (for IMAGE/VIDEO posts)
+  mediaUrls   String[]
+  imageUrl    String?    // Simplified single image URL
+
+  // Optional club posting
+  clubId      String?
+
+  // Author
+  authorId    String
+
+  // Engagement metrics
+  reactionCount Int      @default(0)
+  commentCount  Int      @default(0)
+
+  // Timestamps
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  // Relations
+  author      User       @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  club        Club?      @relation(fields: [clubId], references: [id], onDelete: Cascade)
+  comments    Comment[]
+  reactions   Reaction[]
+  likes       Like[]     @relation("PostLikes")
+  mentions    PostMention[]
+
+  @@index([authorId])
+  @@index([clubId])
+  @@index([createdAt])
+  @@index([type])
+}
+
+model Comment {
+  id          String   @id @default(cuid())
+  content     String   @db.Text
+  postId      String
+  authorId    String
+
+  // For threaded replies
+  parentId    String?
+
+  // Timestamps
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  post        Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  author      User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  parent      Comment? @relation("CommentReplies", fields: [parentId], references: [id], onDelete: Cascade)
+  replies     Comment[] @relation("CommentReplies")
+  reactions   Reaction[]
+
+  @@index([postId])
+  @@index([authorId])
+  @@index([parentId])
+  @@index([createdAt])
+}
+
+enum ReactionType {
+  LIKE
+  LOVE
+  FIRE
+  SMOKE
+  CHEERS
+}
+
+model Reaction {
+  id        String       @id @default(cuid())
+  type      ReactionType @default(LIKE)
+  userId    String
+  postId    String?
+  commentId String?
+  createdAt DateTime     @default(now())
+
+  user      User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  post      Post?        @relation(fields: [postId], references: [id], onDelete: Cascade)
+  comment   Comment?     @relation(fields: [commentId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, postId, type])
+  @@unique([userId, commentId, type])
+  @@index([userId])
+  @@index([postId])
+  @@index([commentId])
+}
+
+// Simplified Like model (using Reaction with type LIKE)
+model Like {
+  id        String   @id @default(cuid())
+  userId    String
+  postId    String
+  createdAt DateTime @default(now())
+
+  user      User     @relation("UserLikes", fields: [userId], references: [id], onDelete: Cascade)
+  post      Post     @relation("PostLikes", fields: [postId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, postId])
+  @@index([userId])
+  @@index([postId])
+}
+
+// User mentions in posts
+model PostMention {
+  id        String   @id @default(cuid())
+  postId    String
+  userId    String
+  createdAt DateTime @default(now())
+
+  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  @@unique([postId, userId])
+  @@index([userId])
+}
+
+// ============================================================================
+// EVENTS & CALENDAR
+// ============================================================================
+
+model Event {
+  id          String   @id @default(cuid())
+  title       String
+  description String?  @db.Text
+  location    String?
+
+  // Timing
+  startTime   DateTime
+  endTime     DateTime?
+
+  // Club association
+  clubId      String
+
+  // Creator
+  creatorId   String
+
+  // Privacy
+  isPublic    Boolean  @default(true)
+
+  // Timestamps
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  club        Club     @relation(fields: [clubId], references: [id], onDelete: Cascade)
+  rsvps       EventRSVP[]
+
+  @@index([clubId])
+  @@index([creatorId])
+  @@index([startTime])
+  @@index([isPublic])
+}
+
+enum RSVPStatus {
+  GOING
+  MAYBE
+  NOT_GOING
+}
+
+model EventRSVP {
+  id        String     @id @default(cuid())
+  eventId   String
+  userId    String
+  status    RSVPStatus @default(GOING)
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+
+  event     Event      @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([eventId, userId])
+  @@index([eventId])
+  @@index([userId])
+}
+
+// ============================================================================
+// DIRECT MESSAGING
+// ============================================================================
+
+model Conversation {
+  id             String    @id @default(cuid())
+  participant1Id String
+  participant2Id String
+  lastMessageAt  DateTime  @default(now())
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  messages       Message[]
+
+  @@unique([participant1Id, participant2Id])
+  @@index([participant1Id])
+  @@index([participant2Id])
+  @@index([lastMessageAt])
+}
+
+model Message {
+  id             String       @id @default(cuid())
+  content        String       @db.Text
+  conversationId String
+  senderId       String
+  receiverId     String
+  isRead         Boolean      @default(false)
+  createdAt      DateTime     @default(now())
+
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  sender         User         @relation("MessageSender", fields: [senderId], references: [id], onDelete: Cascade)
+  receiver       User         @relation("MessageReceiver", fields: [receiverId], references: [id], onDelete: Cascade)
+
+  @@index([conversationId])
+  @@index([senderId])
+  @@index([receiverId])
+  @@index([createdAt])
+  @@index([isRead])
+}
+
+// ============================================================================
+// NOTIFICATIONS
+// ============================================================================
+
+enum NotificationType {
+  NEW_FOLLOWER
+  NEW_POST_IN_CLUB
+  NEW_COMMENT
+  NEW_REPLY
+  POST_MENTION
+  EVENT_REMINDER
+  CLUB_INVITE
+  NEW_MESSAGE
+}
+
+model Notification {
+  id        String           @id @default(cuid())
+  type      NotificationType
+  userId    String
+  title     String
+  message   String           @db.Text
+
+  // Optional link data
+  linkUrl   String?
+
+  // Status
+  isRead    Boolean          @default(false)
+
+  createdAt DateTime         @default(now())
+
+  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([isRead])
+  @@index([createdAt])
+}
+
+// Push notification subscriptions
+model PushSubscription {
+  id        String   @id @default(cuid())
+  userId    String
+  endpoint  String   @unique
+  p256dh    String
+  auth      String
+  userAgent String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+// Notification preferences
+model NotificationPreference {
+  id                    String   @id @default(cuid())
+  userId                String   @unique
+
+  // Push notification settings
+  pushEnabled           Boolean  @default(true)
+  newFollower           Boolean  @default(true)
+  newPostInClub         Boolean  @default(true)
+  newComment            Boolean  @default(true)
+  newReply              Boolean  @default(true)
+  postMention           Boolean  @default(true)
+  eventReminder         Boolean  @default(true)
+  clubInvite            Boolean  @default(true)
+  newMessage            Boolean  @default(true)
+
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  user                  User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+// ============================================================================
+// REVIEWS & RATINGS
+// ============================================================================
+
+enum ReviewCategory {
+  PIPE_TOBACCO
+  CIGAR
+  PIPE
+  ACCESSORY
+}
+
+model Review {
+  id          String         @id @default(cuid())
+  title       String
+  content     String         @db.Text
+  rating      Int            // 1-5 stars
+  category    ReviewCategory
+
+  // Product details
+  productName String
+  brand       String?
+
+  // Optional image
+  imageUrl    String?
+
+  // Optional club association
+  clubId      String?
+
+  // Author
+  authorId    String
+
+  // Timestamps
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+
+  author      User           @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  club        Club?          @relation(fields: [clubId], references: [id], onDelete: Cascade)
+
+  @@index([authorId])
+  @@index([clubId])
+  @@index([category])
+  @@index([rating])
+  @@index([createdAt])
+}
+
+// ============================================================================
+// MODERATION & REPORTING
+// ============================================================================
+
+enum ReportReason {
+  SPAM
+  HARASSMENT
+  INAPPROPRIATE_CONTENT
+  MISINFORMATION
+  OTHER
+}
+
+enum ReportStatus {
+  PENDING
+  REVIEWED
+  RESOLVED
+  DISMISSED
+}
+
+model Report {
+  id          String       @id @default(cuid())
+  reason      ReportReason
+  description String?      @db.Text
+  status      ReportStatus @default(PENDING)
+
+  // Reporter
+  reporterId  String
+
+  // Reported content/user
+  reportedUserId String?
+  reportedPostId String?
+  reportedCommentId String?
+
+  // Timestamps
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  reporter    User         @relation("Reporter", fields: [reporterId], references: [id], onDelete: Cascade)
+  reportedUser User?       @relation("Reported", fields: [reportedUserId], references: [id], onDelete: Cascade)
+
+  @@index([reporterId])
+  @@index([reportedUserId])
+  @@index([status])
+  @@index([createdAt])
+}
