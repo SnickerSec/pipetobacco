@@ -1,6 +1,5 @@
 import { useState, FormEvent, useRef } from 'react';
 import { api } from '../services/api';
-import { extractMentions } from '../utils/mentions';
 import MentionTextarea from './MentionTextarea';
 
 interface CreatePostFormProps {

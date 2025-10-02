@@ -136,7 +136,6 @@ export default function MentionTextarea({
   const getCaretCoordinates = () => {
     if (!textareaRef.current) return { top: 0, left: 0 };
 
-    const textarea = textareaRef.current;
     const textBeforeCursor = value.substring(0, cursorPosition);
     const lines = textBeforeCursor.split('\n');
     const currentLineNumber = lines.length - 1;

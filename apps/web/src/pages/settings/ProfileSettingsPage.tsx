@@ -1,6 +1,6 @@
 import { useState, useEffect, FormEvent } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { api, User } from '../../services/api';
+import { api } from '../../services/api';
 
 export default function ProfileSettingsPage() {
   const navigate = useNavigate();

@@ -1,6 +1,5 @@
 import { Link } from 'react-router-dom';
 import Avatar from '../ui/Avatar';
-import Badge from '../ui/Badge';
 import Card from '../ui/Card';
 
 export interface PostCardProps {
