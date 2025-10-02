@@ -13,4 +13,4 @@ cmds = [
 ]
 
 [start]
-cmd = "npx prisma migrate deploy && npm start"
+cmd = "cd apps/api && npx prisma migrate deploy --schema ../../packages/database/prisma/schema.prisma && cd ../.. && npm run start -w apps/api"
