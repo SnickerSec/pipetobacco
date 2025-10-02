@@ -15,9 +15,12 @@
     "declaration": true,
     "declarationMap": true,
     "sourceMap": true,
+    "baseUrl": ".",
     "paths": {
-      "@ember-society/database": ["../../packages/database/dist/index.d.ts"],
-      "@ember-society/types": ["../../packages/types/dist/index.d.ts"]
+      "@ember-society/database": ["../../packages/database/src"],
+      "@ember-society/database/*": ["../../packages/database/src/*"],
+      "@ember-society/types": ["../../packages/types/src"],
+      "@ember-society/types/*": ["../../packages/types/src/*"]
     }
   },
   "include": ["src/**/*"],
