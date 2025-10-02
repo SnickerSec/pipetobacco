@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import passport from '../config/passport.js';
 import { generateToken } from '../services/jwtService.js';
-import { User } from '@prisma/client';
+import { User } from '@ember-society/database';
 
 const router = Router();
 

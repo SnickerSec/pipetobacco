@@ -8,7 +8,7 @@ const prisma = new PrismaClient();
 // POST /api/reports - Create a new report
 router.post('/', authenticate, async (req: AuthRequest, res: Response) => {
   try {
-    const userId = req.userId;
+    const userId = req.user?.userId;
     if (!userId) {
       return res.status(401).json({ error: 'Unauthorized' });
     }
@@ -89,7 +89,7 @@ router.post('/', authenticate, async (req: AuthRequest, res: Response) => {
 // GET /api/reports - Get all reports (admin only)
 router.get('/', authenticate, async (req: AuthRequest, res: Response) => {
   try {
-    const userId = req.userId;
+    const userId = req.user?.userId;
     if (!userId) {
       return res.status(401).json({ error: 'Unauthorized' });
     }
@@ -196,7 +196,7 @@ router.get('/', authenticate, async (req: AuthRequest, res: Response) => {
 // GET /api/reports/:reportId - Get a single report
 router.get('/:reportId', authenticate, async (req: AuthRequest, res: Response) => {
   try {
-    const userId = req.userId;
+    const userId = req.user?.userId;
     if (!userId) {
       return res.status(401).json({ error: 'Unauthorized' });
     }
@@ -283,7 +283,7 @@ router.get('/:reportId', authenticate, async (req: AuthRequest, res: Response) =
 // PATCH /api/reports/:reportId - Update report status (admin only)
 router.patch('/:reportId', authenticate, async (req: AuthRequest, res: Response) => {
   try {
-    const userId = req.userId;
+    const userId = req.user?.userId;
     if (!userId) {
       return res.status(401).json({ error: 'Unauthorized' });
     }
@@ -341,7 +341,7 @@ router.patch('/:reportId', authenticate, async (req: AuthRequest, res: Response)
 // DELETE /api/reports/:reportId - Delete a report (admin only)
 router.delete('/:reportId', authenticate, async (req: AuthRequest, res: Response) => {
   try {
-    const userId = req.userId;
+    const userId = req.user?.userId;
     if (!userId) {
       return res.status(401).json({ error: 'Unauthorized' });
     }
