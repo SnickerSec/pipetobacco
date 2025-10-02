@@ -100,9 +100,15 @@ Option 2: Deploy to Vercel/Netlify (recommended for static sites)
 - Build command: `npm run build`
 - Output directory: `dist`
 
-## Project Roadmap
+## Documentation
 
-See [PROJECT_PLAN.md](PROJECT_PLAN.md) for the complete 10-week development plan.
+For detailed documentation, see the [docs](./docs) directory:
+
+- [Project Plan & Roadmap](./docs/PROJECT_PLAN.md)
+- [Tech Stack Details](./docs/TECH_STACK.md)
+- [Railway Deployment Guide](./docs/RAILWAY_DEPLOYMENT.md)
+- [OAuth Setup](./docs/OAUTH_SETUP.md)
+- [Complete Documentation Index](./docs/README.md)
 
 ## Current Status
 
