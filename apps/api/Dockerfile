@@ -18,4 +18,5 @@ RUN npm ci
 RUN npm run build -w apps/api
 
 # Run migrations then start
-CMD ["sh", "-c", "cd packages/database && npx prisma migrate deploy && cd ../.. && npm run start -w apps/api"]
+ENTRYPOINT ["sh", "-c"]
+CMD ["cd packages/database && npx prisma migrate deploy && cd ../.. && npm run start -w apps/api"]
