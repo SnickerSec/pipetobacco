@@ -2,8 +2,11 @@ FROM node:20-alpine
 
 WORKDIR /app
 
-# Copy everything
-COPY . .
+# Copy from monorepo root (Railway sets context to repo root)
+COPY ../../package*.json ./
+COPY ../../apps/web ./apps/web
+COPY ../../apps/api/package.json ./apps/api/package.json
+COPY ../../packages ./packages
 
 # Install all dependencies
 RUN npm ci
