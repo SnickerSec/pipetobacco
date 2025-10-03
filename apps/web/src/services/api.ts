@@ -331,6 +331,21 @@ class ApiService {
     return response.json();
   }
 
+  async getPost(postId: string): Promise<Post> {
+    const response = await fetch(`${API_BASE_URL}/api/posts/${postId}`, {
+      headers: this.getAuthHeaders(),
+    });
+
+    if (!response.ok) {
+      if (response.status === 404) {
+        throw new Error('Post not found');
+      }
+      throw new Error('Failed to fetch post');
+    }
+
+    return response.json();
+  }
+
   async createPost(content: string, imageUrl?: string, clubId?: string): Promise<Post> {
     const response = await fetch(`${API_BASE_URL}/api/posts`, {
       method: 'POST',

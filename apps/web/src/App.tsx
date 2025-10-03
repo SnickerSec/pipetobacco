@@ -18,6 +18,7 @@ import OAuthCallbackPage from './pages/auth/OAuthCallbackPage';
 
 // Authenticated Pages
 import FeedPage from './pages/FeedPage';
+import PostDetailPage from './pages/PostDetailPage';
 import ClubsPage from './pages/ClubsPage';
 import ClubPage from './pages/ClubPage';
 import ClubInvitePage from './pages/ClubInvitePage';
@@ -49,6 +50,7 @@ function App() {
         {/* Authenticated Routes */}
         <Route element={<AuthenticatedLayout />}>
           <Route path="/feed" element={<FeedPage />} />
+          <Route path="/posts/:postId" element={<PostDetailPage />} />
           <Route path="/u/:username" element={<UserProfilePage />} />
           {/* Redirect old /profile route to /u */}
           <Route path="/profile/:username" element={<ProfileRedirect />} />
