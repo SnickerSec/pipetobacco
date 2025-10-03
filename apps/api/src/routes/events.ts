@@ -30,6 +30,9 @@ router.get('/clubs/:slug/events', async (req, res) => {
           },
         },
         rsvps: {
+          where: {
+            status: 'GOING',
+          },
           include: {
             user: {
               select: {
