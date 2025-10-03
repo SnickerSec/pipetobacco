@@ -10,6 +10,7 @@ interface Event {
   location: string | null;
   startTime: string;
   endTime: string | null;
+  timezone: string;
   isPublic: boolean;
   creatorId: string;
   club: {
@@ -140,7 +141,7 @@ export default function EventDetailPage() {
     }
   };
 
-  const formatDate = (dateString: string) => {
+  const formatDate = (dateString: string, timezone: string) => {
     const date = new Date(dateString);
     return {
       full: date.toLocaleDateString('en-US', {
@@ -148,11 +149,13 @@ export default function EventDetailPage() {
         year: 'numeric',
         month: 'long',
         day: 'numeric',
+        timeZone: timezone,
       }),
       time: date.toLocaleTimeString('en-US', {
         hour: 'numeric',
         minute: '2-digit',
         hour12: true,
+        timeZone: timezone,
       }),
     };
   };
@@ -183,8 +186,8 @@ export default function EventDetailPage() {
     );
   }
 
-  const startDate = formatDate(event.startTime);
-  const endDate = event.endTime ? formatDate(event.endTime) : null;
+  const startDate = formatDate(event.startTime, event.timezone);
+  const endDate = event.endTime ? formatDate(event.endTime, event.timezone) : null;
   const isPast = new Date(event.startTime) < new Date();
   const goingCount = event.rsvps.filter((r) => r.status === 'GOING').length;
 
@@ -276,6 +279,9 @@ export default function EventDetailPage() {
                   <span className="font-medium">Ends:</span> {endDate.full} at {endDate.time}
                 </p>
               )}
+              <p className="text-sm text-gray-500">
+                <span className="font-medium">Timezone:</span> {event.timezone}
+              </p>
               {isPast && (
                 <p className="text-sm text-gray-500 mt-2">
                   This event ended {formatDistanceToNow(new Date(event.startTime), { addSuffix: true })}

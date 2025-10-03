@@ -23,6 +23,7 @@ interface Event {
   location: string | null;
   startTime: string;
   endTime: string | null;
+  timezone: string;
   isPublic: boolean;
   club: {
     id: string;
@@ -145,13 +146,13 @@ export default function EventsPage() {
     }
   };
 
-  const formatDate = (dateString: string) => {
+  const formatDate = (dateString: string, timezone: string) => {
     const date = new Date(dateString);
     return {
-      day: date.getDate(),
-      month: date.toLocaleDateString('en-US', { month: 'short' }).toUpperCase(),
-      time: date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true }),
-      weekday: date.toLocaleDateString('en-US', { weekday: 'long' }),
+      day: date.toLocaleDateString('en-US', { day: 'numeric', timeZone: timezone }),
+      month: date.toLocaleDateString('en-US', { month: 'short', timeZone: timezone }).toUpperCase(),
+      time: date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true, timeZone: timezone }),
+      weekday: date.toLocaleDateString('en-US', { weekday: 'long', timeZone: timezone }),
     };
   };
 
@@ -291,7 +292,7 @@ export default function EventsPage() {
       ) : (
         <div className="space-y-4">
           {filteredEvents.map((event) => {
-            const date = formatDate(event.startTime);
+            const date = formatDate(event.startTime, event.timezone);
             const isPast = new Date(event.startTime) < new Date();
 
             return (
