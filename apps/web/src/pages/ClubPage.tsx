@@ -162,14 +162,25 @@ export default function ClubPage() {
 
             {/* Action Buttons */}
             <div className="flex items-center space-x-2">
-              {currentUserId && !isMember && !club.isPrivate && (
-                <button
-                  onClick={handleJoinClub}
-                  disabled={isJoining}
-                  className="px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 disabled:opacity-50"
-                >
-                  {isJoining ? 'Joining...' : 'Join Club'}
-                </button>
+              {currentUserId && !club.isPrivate && (
+                <>
+                  {!isMember ? (
+                    <button
+                      onClick={handleJoinClub}
+                      disabled={isJoining}
+                      className="px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 disabled:opacity-50"
+                    >
+                      {isJoining ? 'Joining...' : 'Join Club'}
+                    </button>
+                  ) : (
+                    <button
+                      disabled
+                      className="px-4 py-2 bg-gray-400 text-white rounded-lg cursor-not-allowed"
+                    >
+                      Joined
+                    </button>
+                  )}
+                </>
               )}
 
               {isMember && !isOwner && (
