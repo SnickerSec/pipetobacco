@@ -36,9 +36,10 @@ interface Event {
 
 interface EventCardProps {
   event: Event;
+  compact?: boolean;
 }
 
-export default function EventCard({ event }: EventCardProps) {
+export default function EventCard({ event, compact = false }: EventCardProps) {
   const [showAttendees, setShowAttendees] = useState(false);
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
@@ -46,7 +47,7 @@ export default function EventCard({ event }: EventCardProps) {
       day: date.getDate(),
       month: date.toLocaleDateString('en-US', { month: 'short' }).toUpperCase(),
       time: date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true }),
-      weekday: date.toLocaleDateString('en-US', { weekday: 'long' }),
+      weekday: date.toLocaleDateString('en-US', { weekday: 'short' }),
       full: date.toLocaleDateString('en-US', {
         weekday: 'long',
         month: 'long',
@@ -58,6 +59,46 @@ export default function EventCard({ event }: EventCardProps) {
   const startDate = formatDate(event.startTime);
   const isPast = new Date(event.startTime) < new Date();
 
+  // Compact version for sidebar
+  if (compact) {
+    return (
+      <Link
+        to={`/events/${event.id}`}
+        className="block p-3 rounded-lg border border-gray-200 hover:border-orange-500 hover:bg-orange-50 transition"
+      >
+        <div className="flex gap-3">
+          {/* Mini Date Badge */}
+          <div className="flex-shrink-0">
+            <div
+              className={`rounded-lg p-2 text-center w-14 ${
+                isPast ? 'bg-gray-400' : 'bg-orange-600'
+              } text-white`}
+            >
+              <div className="text-lg font-bold">{startDate.day}</div>
+              <div className="text-xs">{startDate.month}</div>
+            </div>
+          </div>
+
+          {/* Event Info */}
+          <div className="flex-1 min-w-0">
+            <h4 className="font-semibold text-gray-900 text-sm line-clamp-1 mb-1">
+              {event.title}
+            </h4>
+            <p className="text-xs text-gray-600 line-clamp-1 mb-1">
+              {startDate.weekday}, {startDate.time}
+            </p>
+            {event._count.rsvps > 0 && (
+              <p className="text-xs text-gray-500">
+                👥 {event._count.rsvps} going
+              </p>
+            )}
+          </div>
+        </div>
+      </Link>
+    );
+  }
+
+  // Full version for feed/event pages
   return (
     <div className="bg-white rounded-lg shadow hover:shadow-lg transition">
       <Link to={`/events/${event.id}`} className="block">
