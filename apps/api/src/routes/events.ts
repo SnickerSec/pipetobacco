@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import * as db from '@ember-society/database';
-import { authenticate, AuthRequest } from '../middleware/auth.js';
+import { authenticate, optionalAuth, AuthRequest } from '../middleware/auth.js';
 
 const router = Router();
 const prisma = db.prisma;
@@ -62,7 +62,7 @@ router.get('/clubs/:slug/events', async (req, res) => {
 });
 
 // Get a single event
-router.get('/events/:id', async (req, res) => {
+router.get('/events/:id', optionalAuth, async (req: AuthRequest, res) => {
   try {
     const { id } = req.params;
 

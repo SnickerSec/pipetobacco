@@ -11,6 +11,7 @@ interface Event {
   startTime: string;
   endTime: string | null;
   isPublic: boolean;
+  creatorId: string;
   club: {
     id: string;
     name: string;
@@ -39,6 +40,18 @@ export default function EventDetailPage() {
   const [error, setError] = useState<string | null>(null);
   const [userRsvp, setUserRsvp] = useState<string | null>(null);
   const [isRsvping, setIsRsvping] = useState(false);
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+  const [showEditModal, setShowEditModal] = useState(false);
+
+  // Edit form state
+  const [editTitle, setEditTitle] = useState('');
+  const [editDescription, setEditDescription] = useState('');
+  const [editLocation, setEditLocation] = useState('');
+  const [editStartTime, setEditStartTime] = useState('');
+  const [editEndTime, setEditEndTime] = useState('');
+  const [editIsPublic, setEditIsPublic] = useState(true);
+  const [isUpdating, setIsUpdating] = useState(false);
+  const [updateError, setUpdateError] = useState<string | null>(null);
 
   useEffect(() => {
     loadEvent();
@@ -54,13 +67,15 @@ export default function EventDetailPage() {
     try {
       setLoading(true);
       setError(null);
-      const [eventData, rsvpData] = await Promise.all([
+      const [eventData, rsvpData, currentUser] = await Promise.all([
         api.getEvent(id),
         api.getUserRsvp(id).catch(() => null),
+        api.getCurrentUser().catch(() => null),
       ]);
 
       setEvent(eventData);
       setUserRsvp(rsvpData?.status || null);
+      setCurrentUserId(currentUser?.id || null);
     } catch (err: any) {
       console.error('Error loading event:', err);
       setError(err.message || 'Failed to load event');
@@ -82,6 +97,43 @@ export default function EventDetailPage() {
       alert(err.message || 'Failed to RSVP');
     } finally {
       setIsRsvping(false);
+    }
+  };
+
+  const openEditModal = () => {
+    if (!event) return;
+    setEditTitle(event.title);
+    setEditDescription(event.description || '');
+    setEditLocation(event.location || '');
+    setEditStartTime(new Date(event.startTime).toISOString().slice(0, 16));
+    setEditEndTime(event.endTime ? new Date(event.endTime).toISOString().slice(0, 16) : '');
+    setEditIsPublic(event.isPublic);
+    setShowEditModal(true);
+  };
+
+  const handleUpdateEvent = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!id) return;
+
+    setIsUpdating(true);
+    setUpdateError(null);
+
+    try {
+      await api.updateEvent(id, {
+        title: editTitle,
+        description: editDescription || null,
+        location: editLocation || null,
+        startTime: editStartTime,
+        endTime: editEndTime || null,
+        isPublic: editIsPublic,
+      });
+
+      setShowEditModal(false);
+      await loadEvent();
+    } catch (err: any) {
+      setUpdateError(err.message || 'Failed to update event');
+    } finally {
+      setIsUpdating(false);
     }
   };
 
@@ -162,7 +214,17 @@ export default function EventDetailPage() {
               </span>
             )}
           </div>
-          <h1 className="text-3xl font-bold mb-2">{event.title}</h1>
+          <div className="flex items-center justify-between mb-2">
+            <h1 className="text-3xl font-bold">{event.title}</h1>
+            {currentUserId === event.creatorId && (
+              <button
+                onClick={openEditModal}
+                className="px-4 py-2 bg-white text-orange-600 rounded-lg hover:bg-opacity-90 transition text-sm font-medium"
+              >
+                Edit Event
+              </button>
+            )}
+          </div>
           <div className="flex items-center gap-4 text-sm">
             <div className="flex items-center gap-1">
               <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -304,6 +366,132 @@ export default function EventDetailPage() {
           </div>
         </div>
       </div>
+
+      {/* Edit Event Modal */}
+      {showEditModal && event && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg p-6 max-w-lg w-full max-h-[90vh] overflow-y-auto">
+            <h2 className="text-2xl font-bold mb-4">Edit Event</h2>
+
+            <form onSubmit={handleUpdateEvent} className="space-y-4">
+              {/* Title */}
+              <div>
+                <label htmlFor="edit-title" className="block text-sm font-medium text-gray-700 mb-1">
+                  Event Title *
+                </label>
+                <input
+                  type="text"
+                  id="edit-title"
+                  value={editTitle}
+                  onChange={(e) => setEditTitle(e.target.value)}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                  required
+                />
+              </div>
+
+              {/* Description */}
+              <div>
+                <label htmlFor="edit-description" className="block text-sm font-medium text-gray-700 mb-1">
+                  Description
+                </label>
+                <textarea
+                  id="edit-description"
+                  value={editDescription}
+                  onChange={(e) => setEditDescription(e.target.value)}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent resize-none"
+                  rows={3}
+                />
+              </div>
+
+              {/* Location */}
+              <div>
+                <label htmlFor="edit-location" className="block text-sm font-medium text-gray-700 mb-1">
+                  Location
+                </label>
+                <input
+                  type="text"
+                  id="edit-location"
+                  value={editLocation}
+                  onChange={(e) => setEditLocation(e.target.value)}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                />
+              </div>
+
+              {/* Start Time */}
+              <div>
+                <label htmlFor="edit-startTime" className="block text-sm font-medium text-gray-700 mb-1">
+                  Start Time *
+                </label>
+                <input
+                  type="datetime-local"
+                  id="edit-startTime"
+                  value={editStartTime}
+                  onChange={(e) => setEditStartTime(e.target.value)}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                  required
+                />
+              </div>
+
+              {/* End Time */}
+              <div>
+                <label htmlFor="edit-endTime" className="block text-sm font-medium text-gray-700 mb-1">
+                  End Time
+                </label>
+                <input
+                  type="datetime-local"
+                  id="edit-endTime"
+                  value={editEndTime}
+                  onChange={(e) => setEditEndTime(e.target.value)}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                />
+              </div>
+
+              {/* Public/Private */}
+              <div className="flex items-center">
+                <input
+                  type="checkbox"
+                  id="edit-isPublic"
+                  checked={editIsPublic}
+                  onChange={(e) => setEditIsPublic(e.target.checked)}
+                  className="h-4 w-4 text-orange-600 focus:ring-orange-500 border-gray-300 rounded"
+                />
+                <label htmlFor="edit-isPublic" className="ml-2 block text-sm text-gray-700">
+                  Public event (visible to non-members)
+                </label>
+              </div>
+
+              {/* Error Message */}
+              {updateError && (
+                <div className="text-sm text-red-600 bg-red-50 p-3 rounded-lg">
+                  {updateError}
+                </div>
+              )}
+
+              {/* Actions */}
+              <div className="flex space-x-3 pt-4">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowEditModal(false);
+                    setUpdateError(null);
+                  }}
+                  className="flex-1 px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300"
+                  disabled={isUpdating}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="flex-1 px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                  disabled={isUpdating}
+                >
+                  {isUpdating ? 'Updating...' : 'Update Event'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
