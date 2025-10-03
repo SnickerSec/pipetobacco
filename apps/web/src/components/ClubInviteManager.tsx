@@ -7,10 +7,9 @@ interface ClubInviteManagerProps {
 
 export default function ClubInviteManager({ clubSlug }: ClubInviteManagerProps) {
   const [invites, setInvites] = useState<ClubInvite[]>([]);
-  const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isCreating, setIsCreating] = useState(false);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   useEffect(() => {
@@ -29,30 +28,27 @@ export default function ClubInviteManager({ clubSlug }: ClubInviteManagerProps) 
     }
   };
 
-  const handleSendInvite = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    if (!email.trim()) {
-      setError('Please enter an email address');
-      return;
-    }
-
-    setIsSubmitting(true);
+  const handleCreateInvite = async () => {
+    setIsCreating(true);
     setError(null);
     setSuccessMessage(null);
 
     try {
-      await api.createClubInvite(clubSlug, email);
-      setEmail('');
-      setSuccessMessage('Invitation sent successfully!');
+      // Create invite with a placeholder email (will generate link)
+      const invite = await api.createClubInvite(clubSlug, 'invite@placeholder.com');
       await fetchInvites();
 
-      // Clear success message after 3 seconds
-      setTimeout(() => setSuccessMessage(null), 3000);
+      // Auto-copy the link
+      const link = `${window.location.origin}/clubs/invites/${invite.token}`;
+      await navigator.clipboard.writeText(link);
+      setSuccessMessage('Invitation link created and copied to clipboard!');
+
+      // Clear success message after 5 seconds
+      setTimeout(() => setSuccessMessage(null), 5000);
     } catch (err: any) {
-      setError(err.message || 'Failed to send invitation');
+      setError(err.message || 'Failed to create invitation');
     } finally {
-      setIsSubmitting(false);
+      setIsCreating(false);
     }
   };
 
@@ -98,99 +94,105 @@ export default function ClubInviteManager({ clubSlug }: ClubInviteManagerProps) 
 
   return (
     <div className="space-y-6">
-      {/* Send Invitation Form */}
+      {/* Create Invitation Link */}
       <div className="bg-white rounded-lg shadow p-6">
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">Send Invitation</h3>
+        <h3 className="text-lg font-semibold text-gray-900 mb-2">Create Invitation Link</h3>
+        <p className="text-sm text-gray-600 mb-4">
+          Generate a shareable invitation link. You can send it via email, text, or any messaging app.
+        </p>
 
-        <form onSubmit={handleSendInvite} className="space-y-4">
-          <div>
-            <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
-              Email Address
-            </label>
-            <input
-              type="email"
-              id="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-              placeholder="user@example.com"
-              disabled={isSubmitting}
-              required
-            />
+        {error && (
+          <div className="p-3 mb-4 bg-red-50 border border-red-200 rounded-lg">
+            <p className="text-sm text-red-800">{error}</p>
           </div>
+        )}
 
-          {error && (
-            <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
-              <p className="text-sm text-red-800">{error}</p>
-            </div>
-          )}
+        {successMessage && (
+          <div className="p-3 mb-4 bg-green-50 border border-green-200 rounded-lg">
+            <p className="text-sm text-green-800">{successMessage}</p>
+          </div>
+        )}
 
-          {successMessage && (
-            <div className="p-3 bg-green-50 border border-green-200 rounded-lg">
-              <p className="text-sm text-green-800">{successMessage}</p>
-            </div>
-          )}
-
-          <button
-            type="submit"
-            disabled={isSubmitting}
-            className="w-full px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 disabled:opacity-50"
-          >
-            {isSubmitting ? 'Sending...' : 'Send Invitation'}
-          </button>
-        </form>
+        <button
+          onClick={handleCreateInvite}
+          disabled={isCreating}
+          className="w-full px-4 py-3 bg-orange-500 text-white rounded-lg hover:bg-orange-600 disabled:opacity-50 font-medium"
+        >
+          {isCreating ? 'Creating Link...' : '+ Create New Invitation Link'}
+        </button>
       </div>
 
-      {/* Pending Invitations List */}
+      {/* Active Invitation Links */}
       <div className="bg-white rounded-lg shadow">
         <div className="px-6 py-4 border-b border-gray-200">
-          <h3 className="text-lg font-semibold text-gray-900">Pending Invitations</h3>
+          <h3 className="text-lg font-semibold text-gray-900">Active Invitation Links</h3>
+          <p className="text-sm text-gray-600 mt-1">
+            Share these links with people you want to invite to the club
+          </p>
         </div>
 
         {invites.length === 0 ? (
           <div className="px-6 py-12 text-center">
-            <p className="text-gray-600">No pending invitations</p>
+            <p className="text-gray-600">No active invitation links</p>
+            <p className="text-sm text-gray-500 mt-1">Create one above to get started</p>
           </div>
         ) : (
           <div className="divide-y divide-gray-200">
             {invites.map((invite) => (
-              <div key={invite.id} className="px-6 py-4 flex items-center justify-between">
-                <div className="flex-1">
-                  <p className="font-medium text-gray-900">{invite.email}</p>
-                  <div className="flex items-center space-x-4 mt-1 text-sm text-gray-500">
-                    <span>
+              <div key={invite.id} className="px-6 py-4">
+                <div className="flex items-start justify-between gap-4">
+                  <div className="flex-1 min-w-0">
+                    {/* Status Badge */}
+                    <div className="flex items-center gap-2 mb-2">
                       {invite.accepted ? (
-                        <span className="text-green-600">✓ Accepted</span>
+                        <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                          ✓ Used
+                        </span>
                       ) : isExpired(invite.expiresAt) ? (
-                        <span className="text-red-600">Expired</span>
+                        <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                          Expired
+                        </span>
                       ) : (
-                        <span>Pending</span>
+                        <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                          Active
+                        </span>
                       )}
-                    </span>
-                    <span>•</span>
-                    <span>Expires {formatDate(invite.expiresAt)}</span>
-                    <span>•</span>
-                    <span>Sent {formatDate(invite.createdAt)}</span>
-                  </div>
-                </div>
+                    </div>
 
-                <div className="flex items-center space-x-2">
-                  {!invite.accepted && !isExpired(invite.expiresAt) && (
-                    <>
-                      <button
-                        onClick={() => copyInviteLink(invite.token)}
-                        className="px-3 py-1 text-sm text-gray-700 bg-gray-100 rounded hover:bg-gray-200"
-                      >
-                        Copy Link
-                      </button>
-                      <button
-                        onClick={() => handleRevoke(invite.id)}
-                        className="px-3 py-1 text-sm text-red-600 hover:text-red-800"
-                      >
-                        Revoke
-                      </button>
-                    </>
-                  )}
+                    {/* Link Preview */}
+                    <div className="bg-gray-50 px-3 py-2 rounded border border-gray-200 mb-2">
+                      <code className="text-xs text-gray-600 break-all">
+                        {window.location.origin}/clubs/invites/{invite.token}
+                      </code>
+                    </div>
+
+                    {/* Metadata */}
+                    <div className="flex items-center gap-3 text-xs text-gray-500">
+                      <span>Created {formatDate(invite.createdAt)}</span>
+                      <span>•</span>
+                      <span>Expires {formatDate(invite.expiresAt)}</span>
+                    </div>
+                  </div>
+
+                  {/* Actions */}
+                  <div className="flex items-center gap-2">
+                    {!invite.accepted && !isExpired(invite.expiresAt) && (
+                      <>
+                        <button
+                          onClick={() => copyInviteLink(invite.token)}
+                          className="px-3 py-2 text-sm font-medium text-white bg-orange-500 rounded-lg hover:bg-orange-600 transition"
+                        >
+                          Copy Link
+                        </button>
+                        <button
+                          onClick={() => handleRevoke(invite.id)}
+                          className="px-3 py-2 text-sm font-medium text-red-600 hover:text-red-800 transition"
+                        >
+                          Revoke
+                        </button>
+                      </>
+                    )}
+                  </div>
                 </div>
               </div>
             ))}

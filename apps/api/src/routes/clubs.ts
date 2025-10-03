@@ -565,32 +565,38 @@ router.post('/:slug/invites', authenticate, async (req: AuthRequest, res) => {
       return res.status(403).json({ error: 'Only club owners and admins can send invitations' });
     }
 
-    // Check if user with email already exists and is a member
-    const existingUser = await prisma.user.findUnique({
-      where: { email },
-      include: {
-        clubMemberships: {
-          where: { clubId: club.id },
+    // Only validate email if it's not a placeholder (for shareable links)
+    const isPlaceholder = email === 'invite@placeholder.com';
+    let existingUser = null;
+
+    if (!isPlaceholder) {
+      // Check if user with email already exists and is a member
+      existingUser = await prisma.user.findUnique({
+        where: { email },
+        include: {
+          clubMemberships: {
+            where: { clubId: club.id },
+          },
         },
-      },
-    });
+      });
 
-    if (existingUser && existingUser.clubMemberships.length > 0) {
-      return res.status(400).json({ error: 'User is already a member of this club' });
-    }
+      if (existingUser && existingUser.clubMemberships.length > 0) {
+        return res.status(400).json({ error: 'User is already a member of this club' });
+      }
 
-    // Check for existing pending invitation
-    const existingInvite = await prisma.clubInvite.findFirst({
-      where: {
-        clubId: club.id,
-        email,
-        accepted: false,
-        expiresAt: { gt: new Date() },
-      },
-    });
+      // Check for existing pending invitation
+      const existingInvite = await prisma.clubInvite.findFirst({
+        where: {
+          clubId: club.id,
+          email,
+          accepted: false,
+          expiresAt: { gt: new Date() },
+        },
+      });
 
-    if (existingInvite) {
-      return res.status(400).json({ error: 'An invitation for this email already exists' });
+      if (existingInvite) {
+        return res.status(400).json({ error: 'An invitation for this email already exists' });
+      }
     }
 
     // Create invitation
