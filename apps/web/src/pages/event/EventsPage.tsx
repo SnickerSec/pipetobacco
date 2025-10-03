@@ -320,15 +320,38 @@ export default function EventsPage() {
                 }`}
               >
                 <div className="flex flex-col md:flex-row md:items-center md:space-x-6">
-                  {/* Date Badge */}
-                  <div className="flex-shrink-0 mb-4 md:mb-0">
-                    <div
-                      className={`rounded-lg p-4 text-center w-20 ${
-                        isPast ? 'bg-gray-400' : 'bg-orange-600'
-                      } text-white`}
-                    >
-                      <div className="text-2xl font-bold">{date.day}</div>
-                      <div className="text-sm">{date.month}</div>
+                  {/* Date Badge and Location/Attendees for Mobile */}
+                  <div className="flex gap-4 mb-4 md:mb-0">
+                    {/* Date Badge */}
+                    <div className="flex-shrink-0">
+                      <div
+                        className={`rounded-lg p-4 text-center w-20 ${
+                          isPast ? 'bg-gray-400' : 'bg-orange-600'
+                        } text-white`}
+                      >
+                        <div className="text-2xl font-bold">{date.day}</div>
+                        <div className="text-sm">{date.month}</div>
+                      </div>
+                    </div>
+
+                    {/* Location and Attendees - Mobile only */}
+                    <div className="flex-1 md:hidden flex flex-col justify-center gap-2 text-sm text-gray-600">
+                      {event.location && (
+                        <span className="flex items-start gap-1">
+                          <span className="flex-shrink-0">📍</span>
+                          <span className="break-words">{event.location}</span>
+                        </span>
+                      )}
+                      {event._count.rsvps > 0 ? (
+                        <button
+                          onClick={() => setSelectedEventAttendees(event)}
+                          className="text-gray-600 hover:text-orange-600 transition text-left flex-shrink-0"
+                        >
+                          👥 {event._count.rsvps} Going
+                        </button>
+                      ) : (
+                        <span className="flex-shrink-0">👥 No one going yet</span>
+                      )}
                     </div>
                   </div>
 
@@ -360,8 +383,8 @@ export default function EventsPage() {
                     </div>
 
                     <div className="mt-4 space-y-3">
-                      {/* Location and Attendees - Stack on mobile */}
-                      <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 text-sm text-gray-600">
+                      {/* Location and Attendees - Desktop only */}
+                      <div className="hidden md:flex md:flex-row md:items-center gap-2 sm:gap-4 text-sm text-gray-600">
                         {event.location && (
                           <span className="flex items-start gap-1">
                             <span className="flex-shrink-0">📍</span>
