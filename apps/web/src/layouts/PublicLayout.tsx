@@ -8,7 +8,7 @@ export default function PublicLayout() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex items-center justify-between">
             <a href="/" className="flex items-center space-x-2">
-              <span className="text-2xl text-ember-600 font-bold">Herf Social</span>
+              <span className="text-2xl text-ember-600 font-bold italic" style={{ fontFamily: "'Brush Script MT', 'Lucida Handwriting', cursive" }}>Herf Social</span>
             </a>
             <div className="flex items-center space-x-4">
               <a
