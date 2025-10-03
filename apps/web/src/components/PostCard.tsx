@@ -35,6 +35,7 @@ export default function PostCard({ post, onPostDeleted, currentUserId }: PostCar
   const [isLoadingComments, setIsLoadingComments] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
   const [showReportModal, setShowReportModal] = useState(false);
+  const [isCommentFocused, setIsCommentFocused] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
   // Auto-expand comments if post has comments
@@ -124,6 +125,7 @@ export default function PostCard({ post, onPostDeleted, currentUserId }: PostCar
       setComments([comment, ...comments]);
       setCommentCount(commentCount + 1);
       setNewComment('');
+      setIsCommentFocused(false);
     } catch (error) {
       console.error('Error creating comment:', error);
     } finally {
@@ -377,9 +379,10 @@ export default function PostCard({ post, onPostDeleted, currentUserId }: PostCar
                 <textarea
                   value={newComment}
                   onChange={(e) => setNewComment(e.target.value)}
+                  onFocus={() => setIsCommentFocused(true)}
                   placeholder="Write a comment..."
                   className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent resize-none"
-                  rows={2}
+                  rows={isCommentFocused ? 2 : 1}
                   disabled={isSubmittingComment}
                 />
                 <button
