@@ -1,2 +1,8 @@
 [build]
 watchPatterns = ["**"]
+
+[deploy]
+# Mount a persistent volume for uploads
+[[deploy.volumes]]
+mountPath = "/app/apps/api/uploads"
+name = "uploads"
