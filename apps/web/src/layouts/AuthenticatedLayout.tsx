@@ -107,13 +107,13 @@ export default function AuthenticatedLayout() {
 
   return (
     <div className="min-h-screen bg-tobacco-50">
-      {/* Top Navigation (Desktop) */}
-      <header className="bg-white shadow-sm border-b border-tobacco-200 sticky top-0 z-50">
+      {/* Top Navigation (Desktop Only) */}
+      <header className="hidden md:block bg-white shadow-sm border-b border-tobacco-200 sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             {/* Logo */}
             <Link to="/feed" className="flex items-center space-x-2">
-              <span className="text-2xl text-ember-600 hidden md:inline" style={{ fontFamily: "'Brush Script MT', 'Lucida Handwriting', cursive", fontWeight: 400 }}>
+              <span className="text-2xl text-ember-600" style={{ fontFamily: "'Brush Script MT', 'Lucida Handwriting', cursive", fontWeight: 400 }}>
                 The Ember Society
               </span>
             </Link>
@@ -216,7 +216,7 @@ export default function AuthenticatedLayout() {
             </div>
 
             {/* Desktop Navigation */}
-            <nav className="hidden md:flex items-center space-x-3">
+            <nav className="flex items-center space-x-3">
               {navItems.map((item) => {
                 const Icon = item.icon;
                 return (
@@ -275,20 +275,12 @@ export default function AuthenticatedLayout() {
                 )}
               </div>
             </nav>
-
-            {/* Mobile Menu Button */}
-            <button
-              onClick={() => setShowMobileMenu(true)}
-              className="md:hidden p-2 text-tobacco-600 hover:text-tobacco-900"
-            >
-              <Bars3Icon className="h-6 w-6" />
-            </button>
           </div>
         </div>
       </header>
 
-      {/* Main Content - Add bottom padding on mobile for bottom nav */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pb-24 md:pb-8">
+      {/* Main Content - Add bottom padding on mobile for bottom nav, no top padding on mobile */}
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4 md:pt-8 pb-24 md:pb-8">
         <Outlet />
       </main>
 
@@ -297,22 +289,34 @@ export default function AuthenticatedLayout() {
 
       {/* Mobile Bottom Navigation */}
       <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-tobacco-200 z-50">
-        <div className="flex items-center justify-around py-2">
-          {navItems.map((item) => {
-            const Icon = item.icon;
-            return (
-              <Link
-                key={item.path}
-                to={item.path}
-                className={`flex flex-col items-center p-1 min-w-0 ${
-                  isActive(item.path) ? 'text-ember-600' : 'text-tobacco-600'
-                }`}
-              >
-                <Icon className="h-5 w-5" />
-                <span className="text-[10px] mt-0.5 leading-tight truncate max-w-full">{item.label}</span>
-              </Link>
-            );
-          })}
+        <div className="flex items-center py-2">
+          {/* Hamburger Menu Button - Left */}
+          <button
+            onClick={() => setShowMobileMenu(true)}
+            className="flex flex-col items-center p-1 min-w-0 text-tobacco-600 px-3"
+          >
+            <Bars3Icon className="h-5 w-5" />
+            <span className="text-[10px] mt-0.5 leading-tight">Menu</span>
+          </button>
+
+          {/* Navigation Items */}
+          <div className="flex items-center justify-around flex-1">
+            {navItems.map((item) => {
+              const Icon = item.icon;
+              return (
+                <Link
+                  key={item.path}
+                  to={item.path}
+                  className={`flex flex-col items-center p-1 min-w-0 ${
+                    isActive(item.path) ? 'text-ember-600' : 'text-tobacco-600'
+                  }`}
+                >
+                  <Icon className="h-5 w-5" />
+                  <span className="text-[10px] mt-0.5 leading-tight truncate max-w-full">{item.label}</span>
+                </Link>
+              );
+            })}
+          </div>
         </div>
       </nav>
 
@@ -349,25 +353,23 @@ export default function AuthenticatedLayout() {
                 </Link>
 
                 <Link
-                  to="/notifications"
+                  to="/settings/profile"
                   onClick={() => setShowMobileMenu(false)}
                   className="flex items-center space-x-3 px-3 py-3 rounded-lg hover:bg-tobacco-50 text-tobacco-900"
                 >
-                  <BellIcon className="h-6 w-6" />
-                  <span className="font-medium">Notifications</span>
+                  <Cog6ToothIcon className="h-6 w-6" />
+                  <span className="font-medium">Settings</span>
                 </Link>
 
                 <div className="border-t border-tobacco-200 my-4"></div>
 
-                <a
-                  href="/api/auth/logout"
-                  className="flex items-center space-x-3 px-3 py-3 rounded-lg hover:bg-red-50 text-red-600"
+                <button
+                  onClick={handleLogout}
+                  className="flex items-center space-x-3 px-3 py-3 rounded-lg hover:bg-red-50 text-red-600 w-full text-left"
                 >
-                  <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                  </svg>
+                  <ArrowRightOnRectangleIcon className="h-6 w-6" />
                   <span className="font-medium">Log Out</span>
-                </a>
+                </button>
               </nav>
             </div>
           </div>
