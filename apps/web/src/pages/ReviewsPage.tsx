@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { api, Review } from '../services/api';
 import ReviewCard from '../components/ReviewCard';
 import CreateReviewModal from '../components/CreateReviewModal';
+import EditReviewModal from '../components/EditReviewModal';
 
 export default function ReviewsPage() {
   const [reviews, setReviews] = useState<Review[]>([]);
@@ -9,6 +10,8 @@ export default function ReviewsPage() {
   const [error, setError] = useState<string | null>(null);
   const [currentUser, setCurrentUser] = useState<any>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [editingReview, setEditingReview] = useState<Review | null>(null);
   const [categoryFilter, setCategoryFilter] = useState<string>('');
 
   useEffect(() => {
@@ -52,6 +55,11 @@ export default function ReviewsPage() {
     } catch (err: any) {
       alert(err.message || 'Failed to delete review');
     }
+  };
+
+  const handleEditReview = (review: Review) => {
+    setEditingReview(review);
+    setIsEditModalOpen(true);
   };
 
   if (loading) {
@@ -171,6 +179,7 @@ export default function ReviewsPage() {
               key={review.id}
               review={review}
               onDelete={() => handleDeleteReview(review.id)}
+              onEdit={() => handleEditReview(review)}
               currentUserId={currentUser?.id}
             />
           ))}
@@ -183,6 +192,19 @@ export default function ReviewsPage() {
         onClose={() => setIsModalOpen(false)}
         onReviewCreated={loadReviews}
       />
+
+      {/* Edit Review Modal */}
+      {editingReview && (
+        <EditReviewModal
+          isOpen={isEditModalOpen}
+          onClose={() => {
+            setIsEditModalOpen(false);
+            setEditingReview(null);
+          }}
+          onReviewUpdated={loadReviews}
+          review={editingReview}
+        />
+      )}
     </div>
   );
 }
