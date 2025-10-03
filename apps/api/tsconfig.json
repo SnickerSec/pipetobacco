@@ -15,12 +15,13 @@
     "declaration": true,
     "declarationMap": true,
     "sourceMap": true,
-    "preserveSymlinks": true
+    "preserveSymlinks": true,
+    "baseUrl": ".",
+    "paths": {
+      "@ember-society/database": ["../../packages/database/src"],
+      "@ember-society/types": ["../../packages/types/src"]
+    }
   },
   "include": ["src/**/*"],
-  "exclude": ["node_modules", "dist"],
-  "references": [
-    { "path": "../../packages/database" },
-    { "path": "../../packages/types" }
-  ]
+  "exclude": ["node_modules", "dist"]
 }
