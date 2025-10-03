@@ -1,9 +1,9 @@
 {
   "compilerOptions": {
     "target": "ES2022",
-    "module": "NodeNext",
+    "module": "ES2022",
     "lib": ["ES2022"],
-    "moduleResolution": "NodeNext",
+    "moduleResolution": "node",
     "outDir": "./dist",
     "strict": false,
     "noImplicitAny": false,
@@ -13,7 +13,12 @@
     "resolveJsonModule": true,
     "declaration": true,
     "declarationMap": true,
-    "sourceMap": true
+    "sourceMap": true,
+    "baseUrl": ".",
+    "paths": {
+      "@ember-society/database": ["../../node_modules/@ember-society/database/dist/index.d.ts"],
+      "@ember-society/types": ["../../node_modules/@ember-society/types/dist/index.d.ts"]
+    }
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules", "dist"]
