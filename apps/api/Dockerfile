@@ -17,6 +17,9 @@ RUN npm ci
 # Build the API
 RUN npm run build -w apps/api
 
+# Verify the build worked
+RUN ls -la apps/api/dist || (echo "ERROR: dist directory not created" && exit 1)
+
 # Run migrations then start
 ENTRYPOINT ["sh", "-c"]
 CMD ["cd packages/database && npx prisma migrate deploy && cd ../.. && npm run start -w apps/api"]
