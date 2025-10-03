@@ -24,4 +24,4 @@ RUN ls -la apps/api/dist || (echo "ERROR: dist directory not created" && exit 1)
 WORKDIR /app
 
 # Run migrations then start
-CMD ["sh", "-c", "cd /app/apps/api && ls -la dist/ && cd /app && cd packages/database && npx prisma migrate deploy && cd ../.. && npm run start -w apps/api"]
+CMD ["sh", "-c", "cd /app/apps/api && echo 'Checking dist directory:' && ls -la dist/ && cd /app && cd packages/database && npx prisma migrate deploy && cd ../.. && npm run start -w apps/api"]
