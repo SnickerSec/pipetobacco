@@ -20,13 +20,20 @@ interface Message {
 
 interface Conversation {
   id: string;
+  type?: 'DIRECT' | 'GROUP';
   messages: Message[];
-  otherParticipant: {
+  otherParticipant?: {
     id: string;
     username: string;
     displayName: string | null;
     avatarUrl: string | null;
     isVerified: boolean;
+  };
+  club?: {
+    id: string;
+    name: string;
+    slug: string;
+    avatarUrl: string | null;
   };
   unreadCount?: number;
   lastMessageAt: string;
@@ -229,48 +236,99 @@ export default function MessagesPage() {
           </div>
         ) : (
           <div>
-            {conversations.map((conv) => (
-              <button
-                key={conv.id}
-                onClick={() => navigate(`/messages/${conv.otherParticipant.username}`)}
-                className={`w-full p-4 border-b border-gray-200 hover:bg-gray-50 transition-colors text-left ${
-                  username === conv.otherParticipant.username ? 'bg-orange-50' : ''
-                }`}
-              >
-                <div className="flex items-center space-x-3">
-                  <img
-                    src={
-                      conv.otherParticipant.avatarUrl ||
-                      `https://ui-avatars.com/api/?name=${conv.otherParticipant.displayName || conv.otherParticipant.username}`
-                    }
-                    alt={conv.otherParticipant.username}
-                    className="h-12 w-12 rounded-full"
-                  />
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center justify-between">
-                      <p className="text-sm font-medium text-gray-900 truncate">
-                        {conv.otherParticipant.displayName || conv.otherParticipant.username}
-                      </p>
-                      {conv.messages.length > 0 && (
-                        <span className="text-xs text-gray-500">
-                          {formatTime(conv.messages[0].createdAt)}
-                        </span>
+            {conversations.map((conv) => {
+              // Handle GROUP conversations (clubs)
+              if (conv.type === 'GROUP' && conv.club) {
+                return (
+                  <button
+                    key={conv.id}
+                    onClick={() => navigate(`/clubs/${conv.club!.slug}/messages`)}
+                    className="w-full p-4 border-b border-gray-200 hover:bg-gray-50 transition-colors text-left"
+                  >
+                    <div className="flex items-center space-x-3">
+                      <img
+                        src={
+                          conv.club.avatarUrl ||
+                          `https://ui-avatars.com/api/?name=${conv.club.name}`
+                        }
+                        alt={conv.club.name}
+                        className="h-12 w-12 rounded-lg object-cover"
+                      />
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center justify-between">
+                          <p className="text-sm font-medium text-gray-900 truncate">
+                            {conv.club.name}
+                          </p>
+                          {conv.messages.length > 0 && (
+                            <span className="text-xs text-gray-500">
+                              {formatTime(conv.messages[0].createdAt)}
+                            </span>
+                          )}
+                        </div>
+                        {conv.messages.length > 0 && (
+                          <p className="text-sm text-gray-500 truncate">
+                            {conv.messages[0].sender?.displayName || conv.messages[0].sender?.username}: {conv.messages[0].content}
+                          </p>
+                        )}
+                      </div>
+                      {(conv.unreadCount || 0) > 0 && (
+                        <div className="bg-orange-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                          {conv.unreadCount}
+                        </div>
                       )}
                     </div>
-                    {conv.messages.length > 0 && (
-                      <p className="text-sm text-gray-500 truncate">
-                        {conv.messages[0].content}
-                      </p>
-                    )}
-                  </div>
-                  {(conv.unreadCount || 0) > 0 && (
-                    <div className="bg-orange-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
-                      {conv.unreadCount}
+                  </button>
+                );
+              }
+
+              // Handle DIRECT conversations
+              if (conv.otherParticipant) {
+                return (
+                  <button
+                    key={conv.id}
+                    onClick={() => navigate(`/messages/${conv.otherParticipant!.username}`)}
+                    className={`w-full p-4 border-b border-gray-200 hover:bg-gray-50 transition-colors text-left ${
+                      username === conv.otherParticipant.username ? 'bg-orange-50' : ''
+                    }`}
+                  >
+                    <div className="flex items-center space-x-3">
+                      <img
+                        src={
+                          conv.otherParticipant.avatarUrl ||
+                          `https://ui-avatars.com/api/?name=${conv.otherParticipant.displayName || conv.otherParticipant.username}`
+                        }
+                        alt={conv.otherParticipant.username}
+                        className="h-12 w-12 rounded-full"
+                      />
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center justify-between">
+                          <p className="text-sm font-medium text-gray-900 truncate">
+                            {conv.otherParticipant.displayName || conv.otherParticipant.username}
+                          </p>
+                          {conv.messages.length > 0 && (
+                            <span className="text-xs text-gray-500">
+                              {formatTime(conv.messages[0].createdAt)}
+                            </span>
+                          )}
+                        </div>
+                        {conv.messages.length > 0 && (
+                          <p className="text-sm text-gray-500 truncate">
+                            {conv.messages[0].content}
+                          </p>
+                        )}
+                      </div>
+                      {(conv.unreadCount || 0) > 0 && (
+                        <div className="bg-orange-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                          {conv.unreadCount}
+                        </div>
+                      )}
                     </div>
-                  )}
-                </div>
-              </button>
-            ))}
+                  </button>
+                );
+              }
+
+              return null;
+            })}
           </div>
         )}
       </div>
