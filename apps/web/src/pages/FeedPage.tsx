@@ -161,6 +161,62 @@ export default function FeedPage() {
           {/* Create Post */}
           <CreatePostForm onPostCreated={handlePostCreated} clubId={selectedClubId} />
 
+          {/* Mobile: Upcoming Events */}
+          {events.length > 0 && (
+            <div className="lg:hidden bg-white rounded-lg shadow p-4">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-lg font-semibold text-gray-900">Upcoming Events</h2>
+                <button
+                  onClick={() => navigate('/events')}
+                  className="text-sm text-orange-600 hover:text-orange-700"
+                >
+                  View All
+                </button>
+              </div>
+              <EventCard event={events[0]} compact />
+            </div>
+          )}
+
+          {/* Mobile: Recent Reviews */}
+          {reviews.length > 0 && (
+            <div className="lg:hidden bg-white rounded-lg shadow p-4">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-lg font-semibold text-gray-900">Recent Reviews</h2>
+                <button
+                  onClick={() => navigate('/reviews')}
+                  className="text-sm text-orange-600 hover:text-orange-700"
+                >
+                  View All
+                </button>
+              </div>
+              <div
+                onClick={() => navigate('/reviews')}
+                className="border border-gray-200 rounded-lg p-3 hover:border-orange-300 hover:shadow-sm transition cursor-pointer"
+              >
+                <div className="flex items-start justify-between mb-2">
+                  <h3 className="font-semibold text-gray-900 text-sm line-clamp-1">
+                    {reviews[0].productName}
+                  </h3>
+                  <div className="flex items-center gap-1 ml-2 flex-shrink-0">
+                    <svg className="w-4 h-4 text-yellow-400 fill-current" viewBox="0 0 20 20">
+                      <path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z" />
+                    </svg>
+                    <span className="text-sm font-medium text-gray-700">{reviews[0].rating}</span>
+                  </div>
+                </div>
+                <p className="text-xs text-gray-600 line-clamp-2 mb-2">{reviews[0].title}</p>
+                <div className="flex items-center gap-2 text-xs text-gray-500">
+                  <img
+                    src={reviews[0].author.avatarUrl || `https://ui-avatars.com/api/?name=${reviews[0].author.displayName || reviews[0].author.username}&size=20`}
+                    alt={reviews[0].author.username}
+                    className="w-5 h-5 rounded-full"
+                  />
+                  <span>by {reviews[0].author.displayName || reviews[0].author.username}</span>
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* Posts */}
           {posts.length === 0 ? (
             <div className="bg-white rounded-lg shadow p-12 text-center">
@@ -183,8 +239,8 @@ export default function FeedPage() {
           )}
         </div>
 
-        {/* Sidebar - Events & Reviews (Right Column) */}
-        <div className="lg:col-span-4">
+        {/* Sidebar - Events & Reviews (Right Column - Desktop Only) */}
+        <div className="hidden lg:block lg:col-span-4">
           <div className="sticky top-4 space-y-4">
             {/* Upcoming Events */}
             <div className="bg-white rounded-lg shadow p-4">
