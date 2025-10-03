@@ -398,23 +398,27 @@ export default function MessagesPage() {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
                   </svg>
                 </button>
-                <img
-                  src={
-                    currentConversation.otherParticipant.avatarUrl ||
-                    `https://ui-avatars.com/api/?name=${currentConversation.otherParticipant.displayName || currentConversation.otherParticipant.username}`
-                  }
-                  alt={currentConversation.otherParticipant.username}
-                  className="h-10 w-10 rounded-full"
-                />
-                <div>
-                  <h3 className="text-sm font-medium text-gray-900">
-                    {currentConversation.otherParticipant.displayName ||
-                      currentConversation.otherParticipant.username}
-                  </h3>
-                  <p className="text-xs text-gray-500">
-                    @{currentConversation.otherParticipant.username}
-                  </p>
-                </div>
+                {currentConversation.otherParticipant && (
+                  <>
+                    <img
+                      src={
+                        currentConversation.otherParticipant.avatarUrl ||
+                        `https://ui-avatars.com/api/?name=${currentConversation.otherParticipant.displayName || currentConversation.otherParticipant.username}`
+                      }
+                      alt={currentConversation.otherParticipant.username}
+                      className="h-10 w-10 rounded-full"
+                    />
+                    <div>
+                      <h3 className="text-sm font-medium text-gray-900">
+                        {currentConversation.otherParticipant.displayName ||
+                          currentConversation.otherParticipant.username}
+                      </h3>
+                      <p className="text-xs text-gray-500">
+                        @{currentConversation.otherParticipant.username}
+                      </p>
+                    </div>
+                  </>
+                )}
               </div>
             </div>
 
