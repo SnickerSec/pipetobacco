@@ -208,18 +208,18 @@ export default function PostCard({ post, onPostDeleted, currentUserId }: PostCar
                 </svg>
               )}
             </div>
-            <div className="flex items-center text-xs text-gray-500">
-              <span>@{post.author.username}</span>
+            <div className="flex items-center text-[10px] sm:text-xs text-gray-500 gap-1">
+              <span className="truncate">@{post.author.username}</span>
               {post.club && (
                 <>
-                  <span className="mx-1">•</span>
-                  <Link to={`/clubs/${post.club.slug}`} className="hover:underline">
+                  <span>•</span>
+                  <Link to={`/clubs/${post.club.slug}`} className="hover:underline truncate max-w-[120px] sm:max-w-none">
                     {post.club.name}
                   </Link>
                 </>
               )}
-              <span className="mx-1">•</span>
-              <span>{formatDate(post.createdAt)}</span>
+              <span>•</span>
+              <span className="whitespace-nowrap">{formatDate(post.createdAt)}</span>
             </div>
           </div>
         </div>
