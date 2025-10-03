@@ -18,8 +18,8 @@
     "preserveSymlinks": true,
     "baseUrl": ".",
     "paths": {
-      "@ember-society/database": ["../../packages/database/dist/index.d.ts"],
-      "@ember-society/types": ["../../packages/types/dist/index.d.ts"]
+      "@ember-society/database": ["../../packages/database/dist"],
+      "@ember-society/types": ["../../packages/types/dist"]
     }
   },
   "include": ["src/**/*"],
