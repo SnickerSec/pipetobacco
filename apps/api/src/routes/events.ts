@@ -43,7 +43,11 @@ router.get('/clubs/:slug/events', async (req, res) => {
         },
         _count: {
           select: {
-            rsvps: true,
+            rsvps: {
+              where: {
+                status: 'GOING',
+              },
+            },
           },
         },
       },
@@ -86,7 +90,11 @@ router.get('/events/:id', async (req, res) => {
         },
         _count: {
           select: {
-            rsvps: true,
+            rsvps: {
+              where: {
+                status: 'GOING',
+              },
+            },
           },
         },
       },
@@ -155,7 +163,11 @@ router.post('/clubs/:slug/events', authenticate, async (req: AuthRequest, res) =
         },
         _count: {
           select: {
-            rsvps: true,
+            rsvps: {
+              where: {
+                status: 'GOING',
+              },
+            },
           },
         },
       },
@@ -222,7 +234,11 @@ router.patch('/events/:id', authenticate, async (req: AuthRequest, res) => {
         },
         _count: {
           select: {
-            rsvps: true,
+            rsvps: {
+              where: {
+                status: 'GOING',
+              },
+            },
           },
         },
       },

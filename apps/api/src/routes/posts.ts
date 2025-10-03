@@ -85,7 +85,11 @@ router.get('/feed', authenticate, async (req: AuthRequest, res) => {
         },
         _count: {
           select: {
-            rsvps: true,
+            rsvps: {
+              where: {
+                status: 'GOING',
+              },
+            },
           },
         },
       },
