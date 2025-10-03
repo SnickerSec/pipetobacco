@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { api } from '../services/api';
 import { formatDistanceToNow } from 'date-fns';
 
@@ -13,6 +14,7 @@ interface Notification {
 }
 
 export default function NotificationsPage() {
+  const navigate = useNavigate();
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -35,14 +37,22 @@ export default function NotificationsPage() {
     }
   };
 
-  const handleMarkAsRead = async (id: string) => {
-    try {
-      await api.markNotificationAsRead(id);
-      setNotifications((prev) =>
-        prev.map((notif) => (notif.id === id ? { ...notif, isRead: true } : notif))
-      );
-    } catch (err: any) {
-      console.error('Failed to mark notification as read:', err);
+  const handleNotificationClick = async (notification: Notification) => {
+    // Mark as read if unread
+    if (!notification.isRead) {
+      try {
+        await api.markNotificationAsRead(notification.id);
+        setNotifications((prev) =>
+          prev.map((notif) => (notif.id === notification.id ? { ...notif, isRead: true } : notif))
+        );
+      } catch (err: any) {
+        console.error('Failed to mark notification as read:', err);
+      }
+    }
+
+    // Navigate to the link if it exists
+    if (notification.linkUrl) {
+      navigate(notification.linkUrl);
     }
   };
 
@@ -142,7 +152,7 @@ export default function NotificationsPage() {
           {notifications.map((notification) => (
             <div
               key={notification.id}
-              onClick={() => !notification.isRead && handleMarkAsRead(notification.id)}
+              onClick={() => handleNotificationClick(notification)}
               className={`p-4 hover:bg-gray-50 cursor-pointer transition ${
                 !notification.isRead ? 'bg-blue-50' : ''
               }`}
