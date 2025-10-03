@@ -12,9 +12,6 @@ export default function ClubSettingsPage() {
   const [isSaving, setIsSaving] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-  const [inviteLink, setInviteLink] = useState<string | null>(null);
-  const [isGeneratingInvite, setIsGeneratingInvite] = useState(false);
-  const [copied, setCopied] = useState(false);
 
   // Form fields
   const [name, setName] = useState('');
@@ -80,32 +77,6 @@ export default function ClubSettingsPage() {
       setShowDeleteConfirm(false);
     } finally {
       setIsDeleting(false);
-    }
-  };
-
-  const handleGenerateInviteLink = async () => {
-    if (!slug) return;
-
-    setIsGeneratingInvite(true);
-    setError(null);
-
-    try {
-      // Create a shareable invitation with placeholder email
-      const invitation = await api.createClubInvite(slug, 'invite@placeholder.com');
-      const link = `${window.location.origin}/clubs/${slug}/invite/${invitation.token}`;
-      setInviteLink(link);
-    } catch (err: any) {
-      setError(err.message || 'Failed to generate invite link');
-    } finally {
-      setIsGeneratingInvite(false);
-    }
-  };
-
-  const handleCopyInviteLink = () => {
-    if (inviteLink) {
-      navigator.clipboard.writeText(inviteLink);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
     }
   };
 
@@ -202,52 +173,6 @@ export default function ClubSettingsPage() {
               </div>
             </label>
           </div>
-
-          {/* Invite Link Generator (for private clubs) */}
-          {isPrivate && (
-            <div className="border-t border-gray-200 pt-6">
-              <h3 className="text-sm font-medium text-gray-900 mb-2">Shareable Invite Link</h3>
-              <p className="text-sm text-gray-600 mb-4">
-                Generate a link that allows anyone with it to join this private club. The link expires in 7 days.
-              </p>
-
-              {!inviteLink ? (
-                <button
-                  type="button"
-                  onClick={handleGenerateInviteLink}
-                  className="px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 disabled:opacity-50 text-sm"
-                  disabled={isGeneratingInvite}
-                >
-                  {isGeneratingInvite ? 'Generating...' : 'Generate Invite Link'}
-                </button>
-              ) : (
-                <div className="space-y-2">
-                  <div className="flex gap-2">
-                    <input
-                      type="text"
-                      value={inviteLink}
-                      readOnly
-                      className="flex-1 px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 text-sm"
-                    />
-                    <button
-                      type="button"
-                      onClick={handleCopyInviteLink}
-                      className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 text-sm"
-                    >
-                      {copied ? '✓ Copied' : 'Copy'}
-                    </button>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={handleGenerateInviteLink}
-                    className="text-sm text-orange-600 hover:text-orange-700 underline"
-                  >
-                    Generate new link
-                  </button>
-                </div>
-              )}
-            </div>
-          )}
 
           {/* Error Message */}
           {error && (
