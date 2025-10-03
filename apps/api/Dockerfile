@@ -5,7 +5,7 @@ RUN apk add --no-cache openssl
 
 WORKDIR /app
 
-# Copy from monorepo root (Railway sets context to repo root)
+# Copy monorepo files (Railway build context is still repo root even with Root Directory set)
 COPY package*.json ./
 COPY apps/api ./apps/api
 COPY apps/web/package.json ./apps/web/package.json
