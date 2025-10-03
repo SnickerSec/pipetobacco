@@ -3,7 +3,7 @@
     "target": "ES2022",
     "module": "ES2022",
     "lib": ["ES2022"],
-    "moduleResolution": "bundler",
+    "moduleResolution": "node",
     "outDir": "./dist",
     "rootDir": "./src",
     "strict": false,
@@ -14,13 +14,7 @@
     "resolveJsonModule": true,
     "declaration": true,
     "declarationMap": true,
-    "sourceMap": true,
-    "preserveSymlinks": true,
-    "baseUrl": ".",
-    "paths": {
-      "@ember-society/database": ["../../packages/database/dist"],
-      "@ember-society/types": ["../../packages/types/dist"]
-    }
+    "sourceMap": true
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules", "dist"]
