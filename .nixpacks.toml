@@ -1,0 +1,6 @@
+# Disable Nixpacks/Railpack - force Dockerfile usage
+[phases.setup]
+nixPkgs = []
+
+[start]
+cmd = ""
