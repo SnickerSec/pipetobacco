@@ -359,24 +359,32 @@ export default function EventsPage() {
                       </div>
                     </div>
 
-                    <div className="flex items-center justify-between mt-4">
-                      <div className="flex items-center space-x-4 text-sm text-gray-600">
-                        {event.location && <span>📍 {event.location}</span>}
+                    <div className="mt-4 space-y-3">
+                      {/* Location and Attendees - Stack on mobile */}
+                      <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 text-sm text-gray-600">
+                        {event.location && (
+                          <span className="flex items-start gap-1">
+                            <span className="flex-shrink-0">📍</span>
+                            <span className="break-words">{event.location}</span>
+                          </span>
+                        )}
                         {event._count.rsvps > 0 ? (
                           <button
                             onClick={() => setSelectedEventAttendees(event)}
-                            className="text-gray-600 hover:text-orange-600 transition"
+                            className="text-gray-600 hover:text-orange-600 transition text-left sm:text-center flex-shrink-0"
                           >
                             👥 {event._count.rsvps} Going
                           </button>
                         ) : (
-                          <span>👥 No one going yet</span>
+                          <span className="flex-shrink-0">👥 No one going yet</span>
                         )}
                       </div>
+
+                      {/* View Details Button - Full width on mobile */}
                       {!isPast && (
                         <Link
                           to={`/events/${event.id}`}
-                          className="px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 text-sm font-medium"
+                          className="block sm:inline-block text-center px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 text-sm font-medium"
                         >
                           View Details
                         </Link>
