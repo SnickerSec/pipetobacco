@@ -7,7 +7,7 @@
     "dev": "tsx watch src/index.ts",
     "build": "npm run build:deps && npm run build:self",
     "build:deps": "cd ../.. && npm run prisma:generate -w packages/database && npm run build -w packages/database && npm run build -w packages/types",
-    "build:self": "tsc --build",
+    "build:self": "tsc",
     "start": "node dist/index.js",
     "lint": "eslint src --ext .ts"
   },
