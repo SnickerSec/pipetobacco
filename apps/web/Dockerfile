@@ -2,7 +2,7 @@ FROM node:20-alpine
 
 WORKDIR /app
 
-# Copy from monorepo root (Railway sets context to repo root)
+# Copy from monorepo root (context must be repo root, not apps/web)
 COPY package*.json ./
 COPY apps/web ./apps/web
 COPY apps/api/package.json ./apps/api/package.json
