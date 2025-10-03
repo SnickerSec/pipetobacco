@@ -92,23 +92,6 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* CTA Section */}
-      <section className="bg-ember-600 py-16">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-3xl font-bold text-white mb-4">
-            Ready to Join?
-          </h2>
-          <p className="text-ember-100 text-lg mb-8">
-            Connect with fellow enthusiasts and share your passion today.
-          </p>
-          <a
-            href="/register"
-            className="bg-white text-ember-600 px-8 py-3 rounded-lg text-lg font-semibold hover:bg-tobacco-50 transition inline-block"
-          >
-            Create Your Account
-          </a>
-        </div>
-      </section>
     </div>
   );
 }
