@@ -54,6 +54,8 @@ export default function EventDetailPage() {
   const [editIsPublic, setEditIsPublic] = useState(true);
   const [isUpdating, setIsUpdating] = useState(false);
   const [updateError, setUpdateError] = useState<string | null>(null);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
     loadEvent();
@@ -158,6 +160,20 @@ export default function EventDetailPage() {
     }
   };
 
+  const handleDeleteEvent = async () => {
+    if (!id) return;
+
+    setIsDeleting(true);
+    try {
+      await api.deleteEvent(id);
+      navigate('/events');
+    } catch (err: any) {
+      alert(err.message || 'Failed to delete event');
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
   const formatDate = (dateString: string, timezone: string) => {
     const date = new Date(dateString);
     return {
@@ -240,12 +256,20 @@ export default function EventDetailPage() {
           <div className="flex items-center justify-between mb-2">
             <h1 className="text-3xl font-bold">{event.title}</h1>
             {currentUserId === event.creatorId && (
-              <button
-                onClick={openEditModal}
-                className="px-4 py-2 bg-white text-orange-600 rounded-lg hover:bg-opacity-90 transition text-sm font-medium"
-              >
-                Edit Event
-              </button>
+              <div className="flex gap-2">
+                <button
+                  onClick={openEditModal}
+                  className="px-4 py-2 bg-white text-orange-600 rounded-lg hover:bg-opacity-90 transition text-sm font-medium"
+                >
+                  Edit Event
+                </button>
+                <button
+                  onClick={() => setShowDeleteConfirm(true)}
+                  className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition text-sm font-medium"
+                >
+                  Delete
+                </button>
+              </div>
             )}
           </div>
           <div className="flex items-center gap-4 text-sm">
@@ -540,6 +564,34 @@ export default function EventDetailPage() {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {showDeleteConfirm && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg p-6 max-w-md w-full">
+            <h2 className="text-xl font-bold mb-4 text-gray-900">Delete Event?</h2>
+            <p className="text-gray-600 mb-6">
+              Are you sure you want to delete this event? This action cannot be undone and all RSVPs will be lost.
+            </p>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setShowDeleteConfirm(false)}
+                className="flex-1 px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300"
+                disabled={isDeleting}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleDeleteEvent}
+                className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                disabled={isDeleting}
+              >
+                {isDeleting ? 'Deleting...' : 'Delete Event'}
+              </button>
+            </div>
           </div>
         </div>
       )}
