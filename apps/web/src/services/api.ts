@@ -763,6 +763,21 @@ class ApiService {
     return response.json();
   }
 
+  async getUserRsvp(id: string): Promise<any> {
+    const response = await fetch(`${API_BASE_URL}/api/events/${id}/rsvp/me`, {
+      headers: this.getAuthHeaders(),
+    });
+
+    if (!response.ok) {
+      if (response.status === 404) {
+        return null; // No RSVP yet
+      }
+      throw new Error('Failed to fetch RSVP');
+    }
+
+    return response.json();
+  }
+
   async removeRsvp(id: string): Promise<void> {
     const response = await fetch(`${API_BASE_URL}/api/events/${id}/rsvp`, {
       method: 'DELETE',

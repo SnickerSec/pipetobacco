@@ -23,6 +23,7 @@ import ClubsPage from './pages/ClubsPage';
 import ClubPage from './pages/ClubPage';
 import ClubInvitePage from './pages/ClubInvitePage';
 import EventsPage from './pages/event/EventsPage';
+import EventDetailPage from './pages/event/EventDetailPage';
 import MessagesPage from './pages/MessagesPage';
 import NotificationsPage from './pages/NotificationsPage';
 import UserProfilePage from './pages/profile/ProfilePage';
@@ -60,6 +61,7 @@ function App() {
           <Route path="/clubs/:slug" element={<ClubPage />} />
           <Route path="/clubs/invites/:token" element={<ClubInvitePage />} />
           <Route path="/events" element={<EventsPage />} />
+          <Route path="/events/:id" element={<EventDetailPage />} />
           <Route path="/reviews" element={<ReviewsPage />} />
           <Route path="/messages" element={<MessagesPage />} />
           <Route path="/messages/:username" element={<MessagesPage />} />
