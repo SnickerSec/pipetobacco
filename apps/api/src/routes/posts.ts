@@ -99,7 +99,7 @@ router.get('/feed', authenticate, async (req: AuthRequest, res) => {
     }));
 
     // Combine posts and events, then sort by creation/start time
-    const feedItems = [...postsWithLikeStatus, ...eventsWithType].sort((a, b) => {
+    const feedItems = [...postsWithLikeStatus, ...eventsWithType].sort((a: any, b: any) => {
       const aDate = a.type === 'post' ? new Date(a.createdAt) : new Date(a.startTime);
       const bDate = b.type === 'post' ? new Date(b.createdAt) : new Date(b.startTime);
       return bDate.getTime() - aDate.getTime();
