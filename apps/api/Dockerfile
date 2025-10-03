@@ -3,6 +3,9 @@ FROM node:20-alpine
 # Install OpenSSL for Prisma
 RUN apk add --no-cache openssl
 
+# Update npm to latest version
+RUN npm install -g npm@11.6.1
+
 WORKDIR /app
 
 # Copy monorepo files (Railway build context is still repo root even with Root Directory set)
