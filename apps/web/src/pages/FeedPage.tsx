@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { api, Post } from '../services/api';
 import CreatePostForm from '../components/CreatePostForm';
 import PostCard from '../components/PostCard';
+import EventCard from '../components/EventCard';
 
 interface Club {
   id: string;
@@ -10,9 +11,11 @@ interface Club {
   slug: string;
 }
 
+type FeedItem = (Post & { type: 'post' }) | (any & { type: 'event' });
+
 export default function FeedPage() {
   const navigate = useNavigate();
-  const [posts, setPosts] = useState<Post[]>([]);
+  const [feedItems, setFeedItems] = useState<FeedItem[]>([]);
   const [clubs, setClubs] = useState<Club[]>([]);
   const [selectedClubId, setSelectedClubId] = useState<string>('');
   const [loading, setLoading] = useState(true);
@@ -22,12 +25,12 @@ export default function FeedPage() {
   const fetchData = async () => {
     try {
       setLoading(true);
-      const [feedPosts, currentUser, userClubs] = await Promise.all([
+      const [feedData, currentUser, userClubs] = await Promise.all([
         api.getFeed(),
         api.getCurrentUser().catch(() => null),
         api.getMyClubs().catch(() => []),
       ]);
-      setPosts(feedPosts);
+      setFeedItems(feedData);
       setCurrentUserId(currentUser?.id || null);
       setClubs(userClubs);
 
@@ -130,24 +133,28 @@ export default function FeedPage() {
       {/* Create Post */}
       <CreatePostForm onPostCreated={handlePostCreated} clubId={selectedClubId} />
 
-      {/* Posts */}
-      {posts.length === 0 ? (
+      {/* Feed Items (Posts and Events) */}
+      {feedItems.length === 0 ? (
         <div className="bg-white rounded-lg shadow p-12 text-center">
-          <p className="text-gray-600 mb-4">No posts yet</p>
+          <p className="text-gray-600 mb-4">No posts or events yet</p>
           <p className="text-sm text-gray-500">
-            Be the first to post in your clubs!
+            Be the first to post or create an event in your clubs!
           </p>
         </div>
       ) : (
         <div className="space-y-6">
-          {posts.map((post) => (
-            <PostCard
-              key={post.id}
-              post={post}
-              onPostDeleted={handlePostDeleted}
-              currentUserId={currentUserId || undefined}
-            />
-          ))}
+          {feedItems.map((item) =>
+            item.type === 'post' ? (
+              <PostCard
+                key={`post-${item.id}`}
+                post={item}
+                onPostDeleted={handlePostDeleted}
+                currentUserId={currentUserId || undefined}
+              />
+            ) : (
+              <EventCard key={`event-${item.id}`} event={item} />
+            )
+          )}
         </div>
       )}
     </div>

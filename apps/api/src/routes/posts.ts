@@ -6,11 +6,11 @@ import { notifyClubMembers, createNotification, notifyMentionedUsers } from '../
 const router = Router();
 const prisma = db.prisma;
 
-// Get feed for authenticated user (posts from joined clubs only)
+// Get feed for authenticated user (posts and events from joined clubs only)
 router.get('/feed', authenticate, async (req: AuthRequest, res) => {
   try {
     const userId = req.user!.userId;
-    const { limit = '20', offset = '0' } = req.query;
+    const { limit = '50', offset = '0' } = req.query;
 
     // Get clubs that the current user is a member of
     const memberships = await prisma.clubMember.findMany({
@@ -65,10 +65,47 @@ router.get('/feed', authenticate, async (req: AuthRequest, res) => {
 
     const postsWithLikeStatus = posts.map((post) => ({
       ...post,
+      type: 'post',
       isLikedByUser: likedPostIds.has(post.id),
     }));
 
-    res.json(postsWithLikeStatus);
+    // Fetch upcoming events from joined clubs
+    const events = await prisma.event.findMany({
+      where: {
+        clubId: { in: clubIds },
+        startTime: { gte: new Date() }, // Only upcoming events
+      },
+      include: {
+        club: {
+          select: {
+            id: true,
+            name: true,
+            slug: true,
+          },
+        },
+        _count: {
+          select: {
+            rsvps: true,
+          },
+        },
+      },
+      orderBy: { startTime: 'asc' },
+      take: 10, // Limit events to avoid overwhelming feed
+    });
+
+    const eventsWithType = events.map((event) => ({
+      ...event,
+      type: 'event',
+    }));
+
+    // Combine posts and events, then sort by creation/start time
+    const feedItems = [...postsWithLikeStatus, ...eventsWithType].sort((a, b) => {
+      const aDate = a.type === 'post' ? new Date(a.createdAt) : new Date(a.startTime);
+      const bDate = b.type === 'post' ? new Date(b.createdAt) : new Date(b.startTime);
+      return bDate.getTime() - aDate.getTime();
+    });
+
+    res.json(feedItems);
   } catch (error) {
     console.error('Error fetching feed:', error);
     res.status(500).json({ error: 'Failed to fetch feed' });
