@@ -12,6 +12,7 @@ interface User {
 interface MentionTextareaProps {
   value: string;
   onChange: (value: string) => void;
+  onFocus?: () => void;
   placeholder?: string;
   rows?: number;
   className?: string;
@@ -21,6 +22,7 @@ interface MentionTextareaProps {
 export default function MentionTextarea({
   value,
   onChange,
+  onFocus,
   placeholder,
   rows = 4,
   className = '',
@@ -156,6 +158,7 @@ export default function MentionTextarea({
         value={value}
         onChange={handleTextChange}
         onKeyDown={handleKeyDown}
+        onFocus={onFocus}
         placeholder={placeholder}
         rows={rows}
         className={className}

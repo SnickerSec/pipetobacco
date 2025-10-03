@@ -16,6 +16,7 @@ export default function CreatePostForm({ onPostCreated, clubId }: CreatePostForm
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
+  const [isFocused, setIsFocused] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -87,6 +88,7 @@ export default function CreatePostForm({ onPostCreated, clubId }: CreatePostForm
       setImageUrl('');
       handleRemoveFile();
       setShowMediaInput(false);
+      setIsFocused(false);
       if (onPostCreated) {
         onPostCreated();
       }
@@ -105,9 +107,10 @@ export default function CreatePostForm({ onPostCreated, clubId }: CreatePostForm
         <MentionTextarea
           value={content}
           onChange={setContent}
+          onFocus={() => setIsFocused(true)}
           placeholder="What's on your mind? Type @ to mention someone"
           className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent resize-none"
-          rows={4}
+          rows={isFocused ? 4 : 1}
           disabled={isSubmitting}
         />
 
