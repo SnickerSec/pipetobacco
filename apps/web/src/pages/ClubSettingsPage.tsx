@@ -10,6 +10,8 @@ export default function ClubSettingsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   // Form fields
   const [name, setName] = useState('');
@@ -57,6 +59,24 @@ export default function ClubSettingsPage() {
       setError(err.message || 'Failed to update club');
     } finally {
       setIsSaving(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!slug) return;
+
+    setIsDeleting(true);
+    setError(null);
+
+    try {
+      await api.deleteClub(slug);
+      // Redirect to clubs page after deletion
+      navigate('/clubs');
+    } catch (err: any) {
+      setError(err.message || 'Failed to delete club');
+      setShowDeleteConfirm(false);
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -181,6 +201,59 @@ export default function ClubSettingsPage() {
           </div>
         </form>
       </div>
+
+      {/* Danger Zone */}
+      {club?.userMembership?.role === 'OWNER' && (
+        <div className="bg-white rounded-lg shadow p-6 mt-6 border-2 border-red-200">
+          <h2 className="text-xl font-bold text-red-600 mb-4">Danger Zone</h2>
+          <div className="space-y-4">
+            <div>
+              <h3 className="font-semibold text-gray-900">Delete this club</h3>
+              <p className="text-sm text-gray-600 mt-1">
+                Once you delete a club, there is no going back. This will permanently delete the club, all its posts, and remove all members.
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={() => setShowDeleteConfirm(true)}
+              className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50"
+              disabled={isDeleting}
+            >
+              Delete Club
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {showDeleteConfirm && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg max-w-md w-full p-6">
+            <h3 className="text-xl font-bold text-gray-900 mb-2">Delete Club</h3>
+            <p className="text-gray-600 mb-6">
+              Are you sure you want to delete <strong>{club?.name}</strong>? This action cannot be undone. All posts, members, and data associated with this club will be permanently deleted.
+            </p>
+            <div className="flex gap-3">
+              <button
+                type="button"
+                onClick={() => setShowDeleteConfirm(false)}
+                className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50"
+                disabled={isDeleting}
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleDelete}
+                className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50"
+                disabled={isDeleting}
+              >
+                {isDeleting ? 'Deleting...' : 'Delete Club'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
