@@ -1,4 +1,4 @@
-import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
+import { Outlet, Link, useLocation } from 'react-router-dom';
 import { useState, useEffect, useRef } from 'react';
 import {
   HomeIcon,
@@ -15,10 +15,13 @@ import {
 } from '@heroicons/react/24/outline';
 import NotificationPermissionPrompt from '../components/NotificationPermissionPrompt';
 import { api } from '../services/api';
+import { useAuth } from '../contexts/AuthContext';
+import { useNavigate } from 'react-router-dom';
 
 export default function AuthenticatedLayout() {
   const location = useLocation();
   const navigate = useNavigate();
+  const { logout } = useAuth();
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<any>(null);
   const [isSearching, setIsSearching] = useState(false);
@@ -31,8 +34,7 @@ export default function AuthenticatedLayout() {
   const isActive = (path: string) => location.pathname.startsWith(path);
 
   const handleLogout = () => {
-    localStorage.removeItem('auth_token');
-    navigate('/login');
+    logout();
   };
 
   // Close search results and user menu when clicking outside

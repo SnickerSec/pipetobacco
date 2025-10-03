@@ -46,9 +46,9 @@ router.get('/my-clubs', authenticate, async (req: AuthRequest, res) => {
 });
 
 // Get all clubs (public and user's private clubs)
-router.get('/', optionalAuth, async (req: AuthRequest, res) => {
+router.get('/', authenticate, async (req: AuthRequest, res) => {
   try {
-    const userId = req.user?.userId;
+    const userId = req.user!.userId;
 
     const clubs = await prisma.club.findMany({
       where: userId ? {
@@ -84,10 +84,10 @@ router.get('/', optionalAuth, async (req: AuthRequest, res) => {
 });
 
 // Get single club by slug
-router.get('/:slug', optionalAuth, async (req: AuthRequest, res) => {
+router.get('/:slug', authenticate, async (req: AuthRequest, res) => {
   try {
     const { slug } = req.params;
-    const userId = req.user?.userId;
+    const userId = req.user!.userId;
 
     const club = await prisma.club.findUnique({
       where: { slug },
@@ -127,12 +127,10 @@ router.get('/:slug', optionalAuth, async (req: AuthRequest, res) => {
       return res.status(404).json({ error: 'Club not found' });
     }
 
-    // Check if private club and user is not a member
-    if (club.isPrivate) {
-      const isMember = club.members.some(m => m.userId === userId);
-      if (!isMember) {
-        return res.status(403).json({ error: 'This club is private' });
-      }
+    // Check if user is a member
+    const isMember = club.members.some(m => m.userId === userId);
+    if (!isMember) {
+      return res.status(403).json({ error: 'You must be a member of this club to view it' });
     }
 
     // Add user membership info if authenticated
@@ -472,19 +470,19 @@ router.patch('/:slug/members/:memberId', authenticate, async (req: AuthRequest, 
 });
 
 // Get club posts
-router.get('/:slug/posts', async (req: AuthRequest, res) => {
+router.get('/:slug/posts', authenticate, async (req: AuthRequest, res) => {
   try {
     const { slug } = req.params;
     const limit = parseInt(req.query.limit as string) || 20;
     const offset = parseInt(req.query.offset as string) || 0;
-    const userId = req.user?.userId;
+    const userId = req.user!.userId;
 
     const club = await prisma.club.findUnique({
       where: { slug },
       include: {
-        members: userId ? {
+        members: {
           where: { userId },
-        } : false,
+        },
       },
     });
 
@@ -492,11 +490,10 @@ router.get('/:slug/posts', async (req: AuthRequest, res) => {
       return res.status(404).json({ error: 'Club not found' });
     }
 
-    // Check if private and user is not a member
-    const isMember = userId && club.members && club.members.length > 0;
-    if (club.isPrivate && !isMember) {
-      // Return empty array instead of 403 for better UX
-      return res.json([]);
+    // Check if user is a member
+    const isMember = club.members && club.members.length > 0;
+    if (!isMember) {
+      return res.status(403).json({ error: 'You must be a member of this club to view posts' });
     }
 
     const posts = await prisma.post.findMany({

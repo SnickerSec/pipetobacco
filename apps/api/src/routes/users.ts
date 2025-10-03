@@ -121,7 +121,7 @@ router.patch('/me', authenticate, async (req: AuthRequest, res) => {
 });
 
 // Get user profile by username
-router.get('/:username', async (req, res) => {
+router.get('/:username', authenticate, async (req: AuthRequest, res) => {
   try {
     const { username } = req.params;
 
@@ -160,7 +160,7 @@ router.get('/:username', async (req, res) => {
 });
 
 // Get user's posts
-router.get('/:username/posts', async (req, res) => {
+router.get('/:username/posts', authenticate, async (req: AuthRequest, res) => {
   try {
     const { username } = req.params;
     const { limit = '20', offset = '0' } = req.query;
@@ -290,7 +290,7 @@ router.delete('/:username/follow', authenticate, async (req: AuthRequest, res) =
 });
 
 // Get user's followers
-router.get('/:username/followers', async (req, res) => {
+router.get('/:username/followers', authenticate, async (req: AuthRequest, res) => {
   try {
     const { username } = req.params;
     const { limit = '20', offset = '0' } = req.query;
@@ -330,7 +330,7 @@ router.get('/:username/followers', async (req, res) => {
 });
 
 // Get users being followed
-router.get('/:username/following', async (req, res) => {
+router.get('/:username/following', authenticate, async (req: AuthRequest, res) => {
   try {
     const { username } = req.params;
     const { limit = '20', offset = '0' } = req.query;

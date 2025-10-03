@@ -7,7 +7,7 @@ const router = Router();
 const prisma = db.prisma;
 
 // Get all reviews (with optional filtering)
-router.get('/', async (req, res) => {
+router.get('/', authenticate, async (req: AuthRequest, res) => {
   try {
     const { category, clubSlug, limit = '20', offset = '0' } = req.query;
 
@@ -62,7 +62,7 @@ router.get('/', async (req, res) => {
 });
 
 // Get a single review by ID
-router.get('/:reviewId', async (req, res) => {
+router.get('/:reviewId', authenticate, async (req: AuthRequest, res) => {
   try {
     const { reviewId } = req.params;
 
@@ -285,7 +285,7 @@ router.delete('/:reviewId', authenticate, async (req: AuthRequest, res) => {
 });
 
 // Get reviews by user
-router.get('/user/:username', async (req, res) => {
+router.get('/user/:username', authenticate, async (req: AuthRequest, res) => {
   try {
     const { username } = req.params;
     const { limit = '20', offset = '0' } = req.query;

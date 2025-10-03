@@ -66,7 +66,7 @@ router.get('/clubs/:slug/events', async (req, res) => {
 });
 
 // Get a single event
-router.get('/events/:id', optionalAuth, async (req: AuthRequest, res) => {
+router.get('/events/:id', authenticate, async (req: AuthRequest, res) => {
   try {
     const { id } = req.params;
 

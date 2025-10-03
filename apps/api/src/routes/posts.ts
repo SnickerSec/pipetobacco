@@ -219,7 +219,7 @@ router.post('/', authenticate, async (req: AuthRequest, res) => {
 });
 
 // Get a single post by ID
-router.get('/:postId', async (req, res) => {
+router.get('/:postId', authenticate, async (req: AuthRequest, res) => {
   try {
     const { postId } = req.params;
 
@@ -409,7 +409,7 @@ router.delete('/:postId/like', authenticate, async (req: AuthRequest, res) => {
 });
 
 // Get comments for a post
-router.get('/:postId/comments', async (req, res) => {
+router.get('/:postId/comments', authenticate, async (req: AuthRequest, res) => {
   try {
     const { postId } = req.params;
     const { limit = '20', offset = '0' } = req.query;
