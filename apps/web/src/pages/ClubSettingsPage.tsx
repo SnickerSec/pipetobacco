@@ -47,7 +47,7 @@ export default function ClubSettingsPage() {
     try {
       await api.updateClub(slug, {
         name,
-        description: description || null,
+        description: description || undefined,
         isPrivate,
       });
 

@@ -1,12 +1,12 @@
 import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { api } from '../services/api';
-import { useAuth } from '../hooks/useAuth';
 
 export default function ClubMessagesPage() {
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
-  const { user } = useAuth();
+
+  const [currentUser, setCurrentUser] = useState<any>(null);
 
   const [conversation, setConversation] = useState<any>(null);
   const [messages, setMessages] = useState<any[]>([]);
@@ -18,8 +18,18 @@ export default function ClubMessagesPage() {
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    loadCurrentUser();
     loadConversation();
   }, [slug]);
+
+  const loadCurrentUser = async () => {
+    try {
+      const user = await api.getCurrentUser();
+      setCurrentUser(user);
+    } catch (err) {
+      console.error('Failed to load current user:', err);
+    }
+  };
 
   useEffect(() => {
     scrollToBottom();
@@ -138,7 +148,7 @@ export default function ClubMessagesPage() {
             </div>
           ) : (
             messages.map((message) => {
-              const isOwnMessage = message.sender.id === user?.id;
+              const isOwnMessage = message.sender.id === currentUser?.id;
 
               return (
                 <div
