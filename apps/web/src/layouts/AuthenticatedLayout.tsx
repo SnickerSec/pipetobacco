@@ -254,7 +254,7 @@ export default function AuthenticatedLayout() {
                       <span>Profile</span>
                     </Link>
                     <Link
-                      to="/settings"
+                      to="/settings/profile"
                       onClick={() => setShowUserMenu(false)}
                       className="flex items-center space-x-2 px-4 py-2 text-tobacco-700 hover:bg-tobacco-50 transition"
                     >
