@@ -10,6 +10,8 @@ import {
   Bars3Icon,
   UserCircleIcon,
   StarIcon,
+  ArrowRightOnRectangleIcon,
+  Cog6ToothIcon,
 } from '@heroicons/react/24/outline';
 import NotificationPermissionPrompt from '../components/NotificationPermissionPrompt';
 import { api } from '../services/api';
@@ -22,15 +24,25 @@ export default function AuthenticatedLayout() {
   const [isSearching, setIsSearching] = useState(false);
   const [showSearchResults, setShowSearchResults] = useState(false);
   const [showMobileMenu, setShowMobileMenu] = useState(false);
+  const [showUserMenu, setShowUserMenu] = useState(false);
   const searchRef = useRef<HTMLDivElement>(null);
+  const userMenuRef = useRef<HTMLDivElement>(null);
 
   const isActive = (path: string) => location.pathname.startsWith(path);
 
-  // Close search results when clicking outside
+  const handleLogout = () => {
+    localStorage.removeItem('auth_token');
+    navigate('/login');
+  };
+
+  // Close search results and user menu when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
         setShowSearchResults(false);
+      }
+      if (userMenuRef.current && !userMenuRef.current.contains(event.target as Node)) {
+        setShowUserMenu(false);
       }
     };
 
@@ -222,14 +234,43 @@ export default function AuthenticatedLayout() {
               })}
 
               {/* User Menu */}
-              <div className="relative">
-                <Link
-                  to="/profile/me"
+              <div className="relative" ref={userMenuRef}>
+                <button
+                  onClick={() => setShowUserMenu(!showUserMenu)}
                   className="flex items-center space-x-2 hover:opacity-80"
                 >
                   <UserCircleIcon className="h-8 w-8 text-tobacco-600" />
-                </Link>
-                {/* TODO: Add dropdown menu for profile/settings/logout */}
+                </button>
+
+                {/* Dropdown Menu */}
+                {showUserMenu && (
+                  <div className="absolute right-0 mt-2 w-48 bg-white border border-tobacco-200 rounded-lg shadow-lg py-1 z-50">
+                    <Link
+                      to="/profile/me"
+                      onClick={() => setShowUserMenu(false)}
+                      className="flex items-center space-x-2 px-4 py-2 text-tobacco-700 hover:bg-tobacco-50 transition"
+                    >
+                      <UserCircleIcon className="h-5 w-5" />
+                      <span>Profile</span>
+                    </Link>
+                    <Link
+                      to="/settings"
+                      onClick={() => setShowUserMenu(false)}
+                      className="flex items-center space-x-2 px-4 py-2 text-tobacco-700 hover:bg-tobacco-50 transition"
+                    >
+                      <Cog6ToothIcon className="h-5 w-5" />
+                      <span>Settings</span>
+                    </Link>
+                    <hr className="my-1 border-tobacco-200" />
+                    <button
+                      onClick={handleLogout}
+                      className="flex items-center space-x-2 px-4 py-2 text-red-600 hover:bg-red-50 transition w-full text-left"
+                    >
+                      <ArrowRightOnRectangleIcon className="h-5 w-5" />
+                      <span>Logout</span>
+                    </button>
+                  </div>
+                )}
               </div>
             </nav>
 
