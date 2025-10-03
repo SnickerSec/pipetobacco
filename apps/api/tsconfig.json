@@ -5,7 +5,6 @@
     "lib": ["ES2022"],
     "moduleResolution": "node",
     "outDir": "./dist",
-    "rootDir": "./src",
     "strict": false,
     "noImplicitAny": false,
     "esModuleInterop": true,
@@ -14,14 +13,7 @@
     "resolveJsonModule": true,
     "declaration": true,
     "declarationMap": true,
-    "sourceMap": true,
-    "baseUrl": ".",
-    "paths": {
-      "@ember-society/database": ["../../packages/database/src"],
-      "@ember-society/database/*": ["../../packages/database/src/*"],
-      "@ember-society/types": ["../../packages/types/src"],
-      "@ember-society/types/*": ["../../packages/types/src/*"]
-    }
+    "sourceMap": true
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules", "dist"]
