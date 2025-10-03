@@ -14,6 +14,13 @@ COPY packages ./packages
 # Install all dependencies
 RUN npm ci
 
+# Debug: Check workspace setup before building API
+RUN echo "=== Pre-build diagnostics ===" && \
+    echo "1. Node modules @ember-society:" && ls -la node_modules/@ember-society/ && \
+    echo "2. Database package.json:" && cat node_modules/@ember-society/database/package.json && \
+    echo "3. Database dist:" && ls -la node_modules/@ember-society/database/dist/ && \
+    echo "4. Types dist:" && ls -la node_modules/@ember-society/types/dist/
+
 # Build the API
 RUN npm run build -w apps/api
 
