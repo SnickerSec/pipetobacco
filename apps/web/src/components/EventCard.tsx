@@ -1,5 +1,4 @@
 import { Link } from 'react-router-dom';
-import { formatDistanceToNow } from 'date-fns';
 
 interface Event {
   id: string;
