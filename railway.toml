@@ -2,4 +2,4 @@
 watchPatterns = ["**"]
 
 [deploy]
-startCommand = "cd packages/database && npx prisma migrate deploy && cd ../.. && npm run start -w apps/api"
+startCommand = "sh -c 'cd packages/database && npx prisma migrate deploy && cd ../.. && npm run start -w apps/api'"
