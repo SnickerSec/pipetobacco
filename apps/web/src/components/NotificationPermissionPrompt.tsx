@@ -47,7 +47,7 @@ export default function NotificationPermissionPrompt() {
   }
 
   return (
-    <div className="fixed bottom-4 right-4 max-w-sm bg-white rounded-lg shadow-lg border border-gray-200 p-4 z-50 animate-slide-up">
+    <div className="fixed bottom-20 md:bottom-4 right-4 left-4 md:left-auto max-w-sm md:max-w-sm bg-white rounded-lg shadow-lg border border-gray-200 p-4 z-50 animate-slide-up">
       <div className="flex items-start">
         <div className="flex-shrink-0">
           <svg
