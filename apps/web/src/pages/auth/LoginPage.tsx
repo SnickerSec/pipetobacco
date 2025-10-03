@@ -1,5 +1,7 @@
 import { Link } from 'react-router-dom';
 
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+
 export default function LoginPage() {
   return (
     <div className="min-h-[calc(100vh-16rem)] flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
@@ -84,7 +86,7 @@ export default function LoginPage() {
           {/* OAuth Buttons */}
           <div className="grid grid-cols-2 gap-3">
             <a
-              href="http://localhost:3000/api/auth/google"
+              href={`${API_BASE_URL}/api/auth/google`}
               className="w-full inline-flex justify-center py-2 px-4 border border-tobacco-300 rounded-md shadow-sm bg-white text-sm font-medium text-tobacco-700 hover:bg-tobacco-50"
             >
               <svg className="w-5 h-5" viewBox="0 0 24 24">
