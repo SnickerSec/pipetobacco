@@ -11,5 +11,5 @@ RUN npm ci
 # Build the web app
 RUN npm run build -w apps/web
 
-# Start the web server
+# Start the web server (no database needed)
 CMD ["npm", "run", "start", "-w", "apps/web"]

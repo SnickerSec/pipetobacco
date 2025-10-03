@@ -14,5 +14,5 @@ RUN npm ci
 # Build the API
 RUN npm run build -w apps/api
 
-# Start command will be provided by railway.toml
-CMD ["npm", "run", "start", "-w", "apps/api"]
+# Run migrations then start
+CMD ["sh", "-c", "cd packages/database && npx prisma migrate deploy && cd ../.. && npm run start -w apps/api"]
