@@ -6,18 +6,11 @@ import { notifyClubMembers, createNotification, notifyMentionedUsers } from '../
 const router = Router();
 const prisma = db.prisma;
 
-// Get feed for authenticated user (posts from followed users and joined clubs)
+// Get feed for authenticated user (posts from joined clubs only)
 router.get('/feed', authenticate, async (req: AuthRequest, res) => {
   try {
     const userId = req.user!.userId;
     const { limit = '20', offset = '0' } = req.query;
-
-    // Get users that the current user follows
-    const following = await prisma.follow.findMany({
-      where: { followerId: userId },
-      select: { followingId: true },
-    });
-    const followingIds = following.map((f) => f.followingId);
 
     // Get clubs that the current user is a member of
     const memberships = await prisma.clubMember.findMany({
@@ -26,13 +19,10 @@ router.get('/feed', authenticate, async (req: AuthRequest, res) => {
     });
     const clubIds = memberships.map((m) => m.clubId);
 
-    // Fetch posts from followed users, user's own posts, and posts in joined clubs
+    // Fetch posts only from joined clubs
     const posts = await prisma.post.findMany({
       where: {
-        OR: [
-          { authorId: { in: [...followingIds, userId] } }, // Posts from followed users + own posts
-          { clubId: { in: clubIds } }, // Posts in joined clubs
-        ],
+        clubId: { in: clubIds },
       },
       include: {
         author: {
@@ -95,20 +85,23 @@ router.post('/', authenticate, async (req: AuthRequest, res) => {
       return res.status(400).json({ error: 'Content is required' });
     }
 
-    // If posting to a club, verify membership
-    if (clubId) {
-      const membership = await prisma.clubMember.findUnique({
-        where: {
-          clubId_userId: {
-            clubId,
-            userId: authorId,
-          },
-        },
-      });
+    // clubId is now required - users must post to a club
+    if (!clubId) {
+      return res.status(400).json({ error: 'You must select a club to post to. Please join a club first.' });
+    }
 
-      if (!membership) {
-        return res.status(403).json({ error: 'You must be a member of this club to post' });
-      }
+    // Verify membership
+    const membership = await prisma.clubMember.findUnique({
+      where: {
+        clubId_userId: {
+          clubId,
+          userId: authorId,
+        },
+      },
+    });
+
+    if (!membership) {
+      return res.status(403).json({ error: 'You must be a member of this club to post' });
     }
 
     const post = await prisma.post.create({

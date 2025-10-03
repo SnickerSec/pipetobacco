@@ -417,6 +417,18 @@ class ApiService {
     return response.json();
   }
 
+  async getMyClubs(): Promise<Club[]> {
+    const response = await fetch(`${API_BASE_URL}/api/clubs/my-clubs`, {
+      headers: this.getAuthHeaders(),
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to fetch your clubs');
+    }
+
+    return response.json();
+  }
+
   async getClub(slug: string): Promise<Club & { members: ClubMember[]; userMembership: ClubMember | null }> {
     const response = await fetch(`${API_BASE_URL}/api/clubs/${slug}`, {
       headers: this.getAuthHeaders(),

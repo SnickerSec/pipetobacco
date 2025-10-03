@@ -63,6 +63,11 @@ export default function CreatePostForm({ onPostCreated, clubId }: CreatePostForm
       return;
     }
 
+    if (!clubId) {
+      setError('Please select a club to post to');
+      return;
+    }
+
     setIsSubmitting(true);
     setError(null);
 

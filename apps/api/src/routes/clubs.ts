@@ -7,6 +7,44 @@ import { createNotification } from '../services/notificationService.js';
 const router = Router();
 const prisma = new PrismaClient();
 
+// Get user's joined clubs
+router.get('/my-clubs', authenticate, async (req: AuthRequest, res) => {
+  try {
+    const userId = req.user!.userId;
+
+    const memberships = await prisma.clubMember.findMany({
+      where: { userId },
+      include: {
+        club: {
+          include: {
+            creator: {
+              select: {
+                id: true,
+                username: true,
+                displayName: true,
+                avatarUrl: true,
+              },
+            },
+            _count: {
+              select: {
+                members: true,
+                posts: true,
+              },
+            },
+          },
+        },
+      },
+      orderBy: { joinedAt: 'desc' },
+    });
+
+    const clubs = memberships.map((m) => m.club);
+    res.json(clubs);
+  } catch (error) {
+    console.error('Error fetching user clubs:', error);
+    res.status(500).json({ error: 'Failed to fetch user clubs' });
+  }
+});
+
 // Get all clubs (public and user's private clubs)
 router.get('/', async (req: AuthRequest, res) => {
   try {
