@@ -203,17 +203,28 @@ class ApiService {
     };
   }
 
+  private async handleResponse(response: Response) {
+    if (response.status === 401) {
+      // Clear invalid token and redirect to login
+      localStorage.removeItem('auth_token');
+      window.location.href = '/login';
+      throw new Error('Authentication required. Please log in.');
+    }
+
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({ error: 'An error occurred' }));
+      throw new Error(error.error || `HTTP ${response.status}`);
+    }
+
+    return response.json();
+  }
+
   // Auth
   async getCurrentUser(): Promise<User> {
     const response = await fetch(`${API_BASE_URL}/api/users/me`, {
       headers: this.getAuthHeaders(),
     });
-
-    if (!response.ok) {
-      throw new Error('Failed to fetch current user');
-    }
-
-    return response.json();
+    return this.handleResponse(response);
   }
 
   // User Search
@@ -221,23 +232,15 @@ class ApiService {
     const response = await fetch(`${API_BASE_URL}/api/users/search?q=${encodeURIComponent(query)}`, {
       headers: this.getAuthHeaders(),
     });
-
-    if (!response.ok) {
-      throw new Error('Failed to search users');
-    }
-
-    return response.json();
+    return this.handleResponse(response);
   }
 
   // User Profile
   async getUserProfile(username: string): Promise<User> {
-    const response = await fetch(`${API_BASE_URL}/api/users/${username}`);
-
-    if (!response.ok) {
-      throw new Error('Failed to fetch user profile');
-    }
-
-    return response.json();
+    const response = await fetch(`${API_BASE_URL}/api/users/${username}`, {
+      headers: this.getAuthHeaders(),
+    });
+    return this.handleResponse(response);
   }
 
   async updateProfile(data: UpdateProfileData): Promise<User> {
@@ -257,14 +260,12 @@ class ApiService {
   // User Posts
   async getUserPosts(username: string, limit = 20, offset = 0): Promise<Post[]> {
     const response = await fetch(
-      `${API_BASE_URL}/api/users/${username}/posts?limit=${limit}&offset=${offset}`
+      `${API_BASE_URL}/api/users/${username}/posts?limit=${limit}&offset=${offset}`,
+      {
+        headers: this.getAuthHeaders(),
+      }
     );
-
-    if (!response.ok) {
-      throw new Error('Failed to fetch user posts');
-    }
-
-    return response.json();
+    return this.handleResponse(response);
   }
 
   // Follow/Unfollow
