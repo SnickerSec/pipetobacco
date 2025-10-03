@@ -19,7 +19,6 @@ export default function NotificationsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [showAll, setShowAll] = useState(false);
-  const [loadingMore, setLoadingMore] = useState(false);
 
   useEffect(() => {
     loadNotifications();

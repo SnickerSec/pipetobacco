@@ -7,7 +7,6 @@ import {
   ChatBubbleLeftIcon,
   BellIcon,
   MagnifyingGlassIcon,
-  Bars3Icon,
   UserCircleIcon,
   StarIcon,
   ArrowRightOnRectangleIcon,
