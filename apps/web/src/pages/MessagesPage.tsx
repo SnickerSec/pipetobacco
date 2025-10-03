@@ -53,6 +53,8 @@ export default function MessagesPage() {
   const [isSearching, setIsSearching] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [currentUser, setCurrentUser] = useState<any>(null);
+  const [userClubs, setUserClubs] = useState<any[]>([]);
+  const [newMessageTab, setNewMessageTab] = useState<'users' | 'clubs'>('users');
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // Load current user
@@ -67,8 +69,12 @@ export default function MessagesPage() {
 
   const loadCurrentUser = async () => {
     try {
-      const user = await api.getCurrentUser();
+      const [user, clubs] = await Promise.all([
+        api.getCurrentUser(),
+        api.getMyClubs(),
+      ]);
       setCurrentUser(user);
+      setUserClubs(clubs);
     } catch (error) {
       console.error('Error loading current user:', error);
     }
@@ -171,6 +177,11 @@ export default function MessagesPage() {
     setSearchQuery('');
     setSearchResults([]);
     navigate(`/messages/${username}`);
+  };
+
+  const handleStartClubConversation = (clubSlug: string) => {
+    setShowNewMessageModal(false);
+    navigate(`/clubs/${clubSlug}/messages`);
   };
 
   // Search users as the user types
@@ -527,20 +538,46 @@ export default function MessagesPage() {
             </div>
 
             <div className="p-4">
-              <p className="text-sm text-gray-600 mb-4">
-                Search for a user to start a conversation
-              </p>
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search by username or name..."
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-                autoFocus
-              />
+              {/* Tabs */}
+              <div className="flex border-b border-gray-200 mb-4">
+                <button
+                  onClick={() => setNewMessageTab('users')}
+                  className={`flex-1 py-2 text-sm font-medium border-b-2 transition-colors ${
+                    newMessageTab === 'users'
+                      ? 'border-orange-500 text-orange-600'
+                      : 'border-transparent text-gray-500 hover:text-gray-700'
+                  }`}
+                >
+                  Users
+                </button>
+                <button
+                  onClick={() => setNewMessageTab('clubs')}
+                  className={`flex-1 py-2 text-sm font-medium border-b-2 transition-colors ${
+                    newMessageTab === 'clubs'
+                      ? 'border-orange-500 text-orange-600'
+                      : 'border-transparent text-gray-500 hover:text-gray-700'
+                  }`}
+                >
+                  My Clubs
+                </button>
+              </div>
 
-              {/* Search Results */}
-              <div className="mt-4 max-h-64 overflow-y-auto">
+              {newMessageTab === 'users' ? (
+                <>
+                  <p className="text-sm text-gray-600 mb-4">
+                    Search for a user to start a conversation
+                  </p>
+                  <input
+                    type="text"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    placeholder="Search by username or name..."
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                    autoFocus
+                  />
+
+                  {/* Search Results */}
+                  <div className="mt-4 max-h-64 overflow-y-auto">
                 {isSearching ? (
                   <div className="text-center py-4 text-gray-500">Searching...</div>
                 ) : searchQuery.length > 0 && searchQuery.length < 2 ? (
@@ -588,7 +625,51 @@ export default function MessagesPage() {
                     No users found
                   </div>
                 ) : null}
-              </div>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <p className="text-sm text-gray-600 mb-4">
+                    Select a club to message
+                  </p>
+
+                  {/* Clubs List */}
+                  <div className="max-h-64 overflow-y-auto">
+                    {userClubs.length === 0 ? (
+                      <div className="text-center py-8 text-gray-500 text-sm">
+                        You haven't joined any clubs yet
+                      </div>
+                    ) : (
+                      <div className="space-y-1">
+                        {userClubs.map((club) => (
+                          <button
+                            key={club.id}
+                            onClick={() => handleStartClubConversation(club.slug)}
+                            className="w-full flex items-center space-x-3 p-3 hover:bg-gray-100 rounded-lg transition-colors"
+                          >
+                            <img
+                              src={
+                                club.avatarUrl ||
+                                `https://ui-avatars.com/api/?name=${club.name}&background=ea580c&color=fff`
+                              }
+                              alt={club.name}
+                              className="h-10 w-10 rounded-lg object-cover"
+                            />
+                            <div className="flex-1 text-left">
+                              <p className="text-sm font-medium text-gray-900">
+                                {club.name}
+                              </p>
+                              <p className="text-xs text-gray-500">
+                                {club.memberCount} {club.memberCount === 1 ? 'member' : 'members'}
+                              </p>
+                            </div>
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </>
+              )}
 
               <div className="mt-4 flex justify-end">
                 <button
@@ -597,6 +678,7 @@ export default function MessagesPage() {
                     setShowNewMessageModal(false);
                     setSearchQuery('');
                     setSearchResults([]);
+                    setNewMessageTab('users');
                   }}
                   className="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
                 >
