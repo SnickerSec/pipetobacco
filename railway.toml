@@ -2,8 +2,9 @@
 builder = "RAILPACK"
 watchPatterns = ["**"]
 
-[build.railpackBuild]
-buildCommand = "npm run prisma:generate -w packages/database && npm run build -w packages/database && npm run build -w packages/types && npm run build -w apps/api"
+[[build.env]]
+key = "NODE_ENV"
+value = "development"
 
 [deploy]
-startCommand = "cd apps/api && npx prisma migrate deploy --schema ../../packages/database/prisma/schema.prisma && cd ../.. && npm run start -w apps/api"
+startCommand = "cd packages/database && npx prisma migrate deploy && cd ../.. && npm run start -w apps/api"
