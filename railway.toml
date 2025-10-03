@@ -1,10 +1,5 @@
 [build]
-builder = "RAILPACK"
 watchPatterns = ["**"]
 
-[[build.env]]
-key = "NODE_ENV"
-value = "development"
-
 [deploy]
-startCommand = "npm run build -w apps/api && cd packages/database && npx prisma migrate deploy && cd ../.. && npm run start -w apps/api"
+startCommand = "cd packages/database && npx prisma migrate deploy && cd ../.. && npm run start -w apps/api"
