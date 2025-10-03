@@ -25,6 +25,7 @@ export default function EventsPage() {
   const navigate = useNavigate();
   const [events, setEvents] = useState<Event[]>([]);
   const [userClubs, setUserClubs] = useState<any[]>([]);
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [filter, setFilter] = useState<'upcoming' | 'my' | 'past'>('upcoming');
   const [isLoading, setIsLoading] = useState(true);
   const [showCreateModal, setShowCreateModal] = useState(false);
@@ -47,8 +48,13 @@ export default function EventsPage() {
   const loadData = async () => {
     try {
       setIsLoading(true);
-      // Load user's joined clubs only
-      const clubs = await api.getMyClubs();
+      // Load current user and user's joined clubs only
+      const [currentUser, clubs] = await Promise.all([
+        api.getCurrentUser().catch(() => null),
+        api.getMyClubs(),
+      ]);
+
+      setCurrentUserId(currentUser?.id || null);
       setUserClubs(clubs);
 
       // Set first club as default for event creation
@@ -141,8 +147,11 @@ export default function EventsPage() {
       case 'past':
         return events.filter(event => new Date(event.startTime) < now);
       case 'my':
-        // TODO: Filter by RSVP status
-        return events.filter(event => new Date(event.startTime) >= now);
+        // Filter events where user has RSVP'd with status 'GOING'
+        return events.filter(event => {
+          const userRsvp = event.rsvps.find((rsvp: any) => rsvp.userId === currentUserId);
+          return userRsvp?.status === 'GOING';
+        });
       default:
         return events;
     }
