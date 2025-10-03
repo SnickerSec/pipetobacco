@@ -1,4 +1,6 @@
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+// Remove trailing /api if it exists (handle misconfigured env var)
+const AUTH_BASE_URL = API_BASE_URL.replace(/\/api$/, '');
 
 export default function LoginPage() {
   return (
@@ -13,7 +15,7 @@ export default function LoginPage() {
         {/* OAuth Buttons */}
         <div className="bg-white p-8 rounded-lg shadow-md space-y-4">
           <a
-            href={`${API_BASE_URL}/api/auth/google`}
+            href={`${AUTH_BASE_URL}/api/auth/google`}
             className="w-full inline-flex justify-center items-center py-3 px-4 border border-tobacco-300 rounded-md shadow-sm bg-white text-sm font-medium text-tobacco-700 hover:bg-tobacco-50 transition"
           >
             <svg className="w-5 h-5" viewBox="0 0 24 24">
