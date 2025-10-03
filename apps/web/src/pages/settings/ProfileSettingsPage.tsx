@@ -16,12 +16,19 @@ export default function ProfileSettingsPage() {
     website: '',
     avatarUrl: '',
     coverPhotoUrl: '',
+    defaultClubId: '',
   });
 
+  const [clubs, setClubs] = useState<any[]>([]);
+
   useEffect(() => {
-    const fetchProfile = async () => {
+    const fetchData = async () => {
       try {
-        const user = await api.getCurrentUser();
+        const [user, userClubs] = await Promise.all([
+          api.getCurrentUser(),
+          api.getMyClubs(),
+        ]);
+
         setFormData({
           displayName: user.displayName || '',
           bio: user.bio || '',
@@ -29,7 +36,10 @@ export default function ProfileSettingsPage() {
           website: user.website || '',
           avatarUrl: user.avatarUrl || '',
           coverPhotoUrl: user.coverPhotoUrl || '',
+          defaultClubId: user.defaultClubId || '',
         });
+
+        setClubs(userClubs);
       } catch (err) {
         setError('Failed to load profile');
         console.error(err);
@@ -38,7 +48,7 @@ export default function ProfileSettingsPage() {
       }
     };
 
-    fetchProfile();
+    fetchData();
   }, []);
 
   const handleSubmit = async (e: FormEvent) => {
@@ -190,6 +200,31 @@ export default function ProfileSettingsPage() {
                 </div>
               )}
             </div>
+
+            {/* Default Club */}
+            {clubs.length > 1 && (
+              <div>
+                <label htmlFor="defaultClubId" className="block text-sm font-medium text-gray-700 mb-2">
+                  Default Club for Posting
+                </label>
+                <select
+                  id="defaultClubId"
+                  value={formData.defaultClubId}
+                  onChange={(e) => setFormData({ ...formData, defaultClubId: e.target.value })}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                >
+                  <option value="">No default (select each time)</option>
+                  {clubs.map((club) => (
+                    <option key={club.id} value={club.id}>
+                      {club.name}
+                    </option>
+                  ))}
+                </select>
+                <p className="mt-1 text-sm text-gray-500">
+                  This club will be pre-selected when creating posts on the feed page
+                </p>
+              </div>
+            )}
 
             {/* Cover Photo URL */}
             <div>

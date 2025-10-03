@@ -11,6 +11,7 @@ interface User {
   avatarUrl: string | null;
   coverPhotoUrl: string | null;
   isVerified: boolean;
+  defaultClubId?: string | null;
   createdAt: string;
   _count?: {
     posts: number;
@@ -26,6 +27,7 @@ interface UpdateProfileData {
   website?: string;
   avatarUrl?: string;
   coverPhotoUrl?: string;
+  defaultClubId?: string | null;
 }
 
 interface Post {

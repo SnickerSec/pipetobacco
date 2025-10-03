@@ -44,9 +44,15 @@ export default function FeedPage() {
       setCurrentUserId(currentUser?.id || null);
       setClubs(userClubs);
 
-      // Set first club as default if not already set
+      // Set default club if user has one set, otherwise use first club
       if (!selectedClubId && userClubs.length > 0) {
-        setSelectedClubId(userClubs[0].id);
+        if (currentUser?.defaultClubId) {
+          // Check if default club is in user's clubs
+          const defaultClubExists = userClubs.some((club: Club) => club.id === currentUser.defaultClubId);
+          setSelectedClubId(defaultClubExists ? currentUser.defaultClubId : userClubs[0].id);
+        } else {
+          setSelectedClubId(userClubs[0].id);
+        }
       }
     } catch (err) {
       setError('Failed to load feed');

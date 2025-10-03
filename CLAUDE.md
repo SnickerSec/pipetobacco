@@ -278,3 +278,4 @@ Comprehensive documentation in `/docs/`:
 - Security audit
 - Beta testing
 - Production launch
+- commit and push after we make changes

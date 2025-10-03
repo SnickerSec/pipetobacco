@@ -61,6 +61,7 @@ router.get('/me', authenticate, async (req: AuthRequest, res) => {
         avatarUrl: true,
         coverPhotoUrl: true,
         isVerified: true,
+        defaultClubId: true,
         createdAt: true,
         _count: {
           select: {
@@ -86,7 +87,21 @@ router.get('/me', authenticate, async (req: AuthRequest, res) => {
 // Update current user profile
 router.patch('/me', authenticate, async (req: AuthRequest, res) => {
   try {
-    const { displayName, bio, location, website, avatarUrl, coverPhotoUrl } = req.body;
+    const { displayName, bio, location, website, avatarUrl, coverPhotoUrl, defaultClubId } = req.body;
+
+    // If defaultClubId is being set, verify user is a member of that club
+    if (defaultClubId !== undefined && defaultClubId !== null) {
+      const membership = await prisma.clubMember.findFirst({
+        where: {
+          userId: req.user!.userId,
+          clubId: defaultClubId,
+        },
+      });
+
+      if (!membership) {
+        return res.status(400).json({ error: 'You must be a member of the club to set it as default' });
+      }
+    }
 
     const updatedUser = await prisma.user.update({
       where: { id: req.user!.userId },
@@ -97,6 +112,7 @@ router.patch('/me', authenticate, async (req: AuthRequest, res) => {
         ...(website !== undefined && { website }),
         ...(avatarUrl !== undefined && { avatarUrl }),
         ...(coverPhotoUrl !== undefined && { coverPhotoUrl }),
+        ...(defaultClubId !== undefined && { defaultClubId }),
       },
       select: {
         id: true,
@@ -109,6 +125,7 @@ router.patch('/me', authenticate, async (req: AuthRequest, res) => {
         avatarUrl: true,
         coverPhotoUrl: true,
         isVerified: true,
+        defaultClubId: true,
         createdAt: true,
       },
     });
