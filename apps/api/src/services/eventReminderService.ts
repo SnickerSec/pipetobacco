@@ -20,13 +20,14 @@ export async function sendEventReminders(): Promise<void> {
     const twentyFourHourBuffer = new Date(twentyFourHoursFromNow.getTime() + bufferMinutes * 60 * 1000);
     const oneHourBuffer = new Date(oneHourFromNow.getTime() + bufferMinutes * 60 * 1000);
 
-    // Find events that need 24h reminders
+    // Find events that need 24h reminders (not yet sent)
     const eventsFor24hReminders = await prisma.event.findMany({
       where: {
         startTime: {
           gte: twentyFourHoursFromNow,
           lte: twentyFourHourBuffer,
         },
+        reminder24hSent: false,
       },
       include: {
         club: {
@@ -47,13 +48,14 @@ export async function sendEventReminders(): Promise<void> {
       },
     });
 
-    // Find events that need 1h reminders
+    // Find events that need 1h reminders (not yet sent)
     const eventsFor1hReminders = await prisma.event.findMany({
       where: {
         startTime: {
           gte: oneHourFromNow,
           lte: oneHourBuffer,
         },
+        reminder1hSent: false,
       },
       include: {
         club: {
@@ -87,6 +89,12 @@ export async function sendEventReminders(): Promise<void> {
           })
         )
       );
+
+      // Mark 24h reminder as sent
+      await prisma.event.update({
+        where: { id: event.id },
+        data: { reminder24hSent: true },
+      });
     }
 
     // Send 1h reminders
@@ -102,6 +110,12 @@ export async function sendEventReminders(): Promise<void> {
           })
         )
       );
+
+      // Mark 1h reminder as sent
+      await prisma.event.update({
+        where: { id: event.id },
+        data: { reminder1hSent: true },
+      });
     }
 
     console.log(

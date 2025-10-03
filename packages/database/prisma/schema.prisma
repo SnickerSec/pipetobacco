@@ -337,6 +337,10 @@ model Event {
   // Privacy
   isPublic    Boolean  @default(true)
 
+  // Reminder tracking
+  reminder24hSent Boolean @default(false)
+  reminder1hSent  Boolean @default(false)
+
   // Timestamps
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
