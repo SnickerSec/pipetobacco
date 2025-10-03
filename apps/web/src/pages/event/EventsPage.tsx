@@ -2,6 +2,20 @@ import { useState, useEffect } from 'react';
 import { api } from '../../services/api';
 import { Link, useNavigate } from 'react-router-dom';
 
+interface User {
+  id: string;
+  username: string;
+  displayName: string | null;
+  avatarUrl: string | null;
+  isVerified: boolean;
+}
+
+interface RSVP {
+  userId: string;
+  status: string;
+  user: User;
+}
+
 interface Event {
   id: string;
   title: string;
@@ -15,7 +29,7 @@ interface Event {
     name: string;
     slug: string;
   };
-  rsvps: any[];
+  rsvps: RSVP[];
   _count: {
     rsvps: number;
   };
@@ -29,6 +43,7 @@ export default function EventsPage() {
   const [filter, setFilter] = useState<'upcoming' | 'my' | 'past'>('upcoming');
   const [isLoading, setIsLoading] = useState(true);
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const [selectedEventAttendees, setSelectedEventAttendees] = useState<Event | null>(null);
 
   // Form state
   const [selectedClubId, setSelectedClubId] = useState('');
@@ -327,7 +342,16 @@ export default function EventsPage() {
                     <div className="flex items-center justify-between mt-4">
                       <div className="flex items-center space-x-4 text-sm text-gray-600">
                         {event.location && <span>📍 {event.location}</span>}
-                        <span>👥 {event._count.rsvps} Going</span>
+                        {event._count.rsvps > 0 ? (
+                          <button
+                            onClick={() => setSelectedEventAttendees(event)}
+                            className="text-gray-600 hover:text-orange-600 transition"
+                          >
+                            👥 {event._count.rsvps} Going
+                          </button>
+                        ) : (
+                          <span>👥 No one going yet</span>
+                        )}
                       </div>
                       {!isPast && (
                         <Link
@@ -491,6 +515,71 @@ export default function EventsPage() {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Attendees Modal */}
+      {selectedEventAttendees && (
+        <div
+          className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
+          onClick={() => setSelectedEventAttendees(null)}
+        >
+          <div
+            className="bg-white rounded-lg max-w-md w-full max-h-[80vh] overflow-hidden"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="p-4 border-b border-gray-200">
+              <div className="flex items-center justify-between">
+                <h3 className="text-lg font-semibold text-gray-900">
+                  People Going ({selectedEventAttendees._count.rsvps})
+                </h3>
+                <button
+                  onClick={() => setSelectedEventAttendees(null)}
+                  className="text-gray-500 hover:text-gray-700"
+                >
+                  <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+            <div className="overflow-y-auto max-h-[60vh]">
+              {selectedEventAttendees.rsvps.map((rsvp) => (
+                <Link
+                  key={rsvp.userId}
+                  to={`/u/${rsvp.user.username}`}
+                  onClick={() => setSelectedEventAttendees(null)}
+                  className="flex items-center space-x-3 p-4 hover:bg-gray-50 transition"
+                >
+                  <img
+                    src={
+                      rsvp.user.avatarUrl ||
+                      `https://ui-avatars.com/api/?name=${rsvp.user.displayName || rsvp.user.username}&size=40&background=ea580c&color=fff`
+                    }
+                    alt={rsvp.user.displayName || rsvp.user.username}
+                    className="h-10 w-10 rounded-full"
+                  />
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-1">
+                      <p className="text-sm font-medium text-gray-900 truncate">
+                        {rsvp.user.displayName || rsvp.user.username}
+                      </p>
+                      {rsvp.user.isVerified && (
+                        <svg className="h-4 w-4 text-blue-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                          <path
+                            fillRule="evenodd"
+                            d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                            clipRule="evenodd"
+                          />
+                        </svg>
+                      )}
+                    </div>
+                    <p className="text-sm text-gray-600">@{rsvp.user.username}</p>
+                  </div>
+                </Link>
+              ))}
+            </div>
           </div>
         </div>
       )}
