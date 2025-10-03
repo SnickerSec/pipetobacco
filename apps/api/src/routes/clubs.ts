@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { PrismaClient } from '@prisma/client';
-import { authenticate, type AuthRequest } from '../middleware/auth.js';
+import { authenticate, optionalAuth, type AuthRequest } from '../middleware/auth.js';
 import crypto from 'crypto';
 import { createNotification } from '../services/notificationService.js';
 
@@ -46,7 +46,7 @@ router.get('/my-clubs', authenticate, async (req: AuthRequest, res) => {
 });
 
 // Get all clubs (public and user's private clubs)
-router.get('/', async (req: AuthRequest, res) => {
+router.get('/', optionalAuth, async (req: AuthRequest, res) => {
   try {
     const userId = req.user?.userId;
 
@@ -84,7 +84,7 @@ router.get('/', async (req: AuthRequest, res) => {
 });
 
 // Get single club by slug
-router.get('/:slug', async (req: AuthRequest, res) => {
+router.get('/:slug', optionalAuth, async (req: AuthRequest, res) => {
   try {
     const { slug } = req.params;
     const userId = req.user?.userId;
