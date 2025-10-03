@@ -287,7 +287,7 @@ export default function AuthenticatedLayout() {
 
       {/* Mobile Bottom Navigation */}
       <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-tobacco-200 z-50">
-        <div className="flex items-center py-2 px-1">
+        <div className="flex items-center justify-around py-2">
           {/* Navigation Items */}
           {navItems.map((item) => {
             const Icon = item.icon;
@@ -295,12 +295,12 @@ export default function AuthenticatedLayout() {
               <Link
                 key={item.path}
                 to={item.path}
-                className={`flex flex-col items-center flex-1 py-1 ${
+                className={`flex flex-col items-center py-1 min-w-0 ${
                   isActive(item.path) ? 'text-ember-600' : 'text-tobacco-600'
                 }`}
               >
-                <Icon className="h-5 w-5" />
-                <span className="text-[10px] mt-0.5 leading-tight truncate max-w-full">{item.label}</span>
+                <Icon className="h-5 w-5 flex-shrink-0" />
+                <span className="text-[10px] mt-0.5 leading-tight truncate max-w-[60px]">{item.label}</span>
               </Link>
             );
           })}
@@ -308,21 +308,21 @@ export default function AuthenticatedLayout() {
           {/* Notifications */}
           <Link
             to="/notifications"
-            className={`flex flex-col items-center flex-1 py-1 ${
+            className={`flex flex-col items-center py-1 min-w-0 ${
               isActive('/notifications') ? 'text-ember-600' : 'text-tobacco-600'
             }`}
           >
-            <BellIcon className="h-5 w-5" />
-            <span className="text-[10px] mt-0.5 leading-tight truncate max-w-full">Notifications</span>
+            <BellIcon className="h-5 w-5 flex-shrink-0" />
+            <span className="text-[10px] mt-0.5 leading-tight truncate max-w-[60px]">Notifications</span>
           </Link>
 
           {/* Profile Menu Button - Right */}
           <button
             onClick={() => setShowMobileMenu(true)}
-            className="flex flex-col items-center flex-1 py-1 text-tobacco-600"
+            className="flex flex-col items-center py-1 min-w-0 text-tobacco-600"
           >
-            <UserCircleIcon className="h-5 w-5" />
-            <span className="text-[10px] mt-0.5 leading-tight truncate max-w-full">Profile</span>
+            <UserCircleIcon className="h-5 w-5 flex-shrink-0" />
+            <span className="text-[10px] mt-0.5 leading-tight truncate max-w-[60px]">Profile</span>
           </button>
         </div>
       </nav>
