@@ -104,12 +104,29 @@ export default function EventDetailPage() {
 
   const openEditModal = () => {
     if (!event) return;
+
+    // Convert UTC time to event's timezone for the datetime-local input
+    const eventTimezone = event.timezone || 'America/New_York';
+    const startDate = new Date(event.startTime);
+    const endDate = event.endTime ? new Date(event.endTime) : null;
+
+    // Format the date as it appears in the event's timezone
+    const formatForInput = (date: Date, tz: string) => {
+      const year = date.toLocaleDateString('en-US', { year: 'numeric', timeZone: tz });
+      const month = date.toLocaleDateString('en-US', { month: '2-digit', timeZone: tz });
+      const day = date.toLocaleDateString('en-US', { day: '2-digit', timeZone: tz });
+      const hour = date.toLocaleTimeString('en-US', { hour: '2-digit', hour12: false, timeZone: tz }).split(':')[0];
+      const minute = date.toLocaleTimeString('en-US', { minute: '2-digit', timeZone: tz });
+
+      return `${year}-${month}-${day}T${hour}:${minute}`;
+    };
+
     setEditTitle(event.title);
     setEditDescription(event.description || '');
     setEditLocation(event.location || '');
-    setEditStartTime(new Date(event.startTime).toISOString().slice(0, 16));
-    setEditEndTime(event.endTime ? new Date(event.endTime).toISOString().slice(0, 16) : '');
-    setEditTimezone((event as any).timezone || 'America/New_York');
+    setEditStartTime(formatForInput(startDate, eventTimezone));
+    setEditEndTime(endDate ? formatForInput(endDate, eventTimezone) : '');
+    setEditTimezone(eventTimezone);
     setEditIsPublic(event.isPublic);
     setShowEditModal(true);
   };

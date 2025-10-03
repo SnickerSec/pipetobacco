@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import * as db from '@ember-society/database';
 import { authenticate, optionalAuth, AuthRequest } from '../middleware/auth.js';
+import { zonedTimeToUtc } from 'date-fns-tz';
 
 const router = Router();
 const prisma = db.prisma;
@@ -148,14 +149,19 @@ router.post('/clubs/:slug/events', authenticate, async (req: AuthRequest, res) =
       return res.status(403).json({ error: 'You must be a member of this club to create events' });
     }
 
+    // Parse the time as if it's in the event's timezone
+    const eventTimezone = timezone || 'America/New_York';
+    const startTimeUtc = zonedTimeToUtc(startTime, eventTimezone);
+    const endTimeUtc = endTime ? zonedTimeToUtc(endTime, eventTimezone) : null;
+
     const event = await prisma.event.create({
       data: {
         title,
         description,
         location,
-        startTime: new Date(startTime),
-        endTime: endTime ? new Date(endTime) : null,
-        timezone: timezone || 'America/New_York',
+        startTime: startTimeUtc,
+        endTime: endTimeUtc,
+        timezone: eventTimezone,
         isPublic: isPublic !== undefined ? isPublic : true,
         clubId: club.id,
         creatorId: userId,
@@ -221,17 +227,23 @@ router.patch('/events/:id', authenticate, async (req: AuthRequest, res) => {
       return res.status(403).json({ error: 'You do not have permission to edit this event' });
     }
 
+    // Use the new timezone if provided, otherwise use existing
+    const eventTimezone = timezone !== undefined ? timezone : event.timezone;
+
+    // Parse times in the event's timezone if they're being updated
+    const updateData: any = {
+      ...(title !== undefined && { title }),
+      ...(description !== undefined && { description }),
+      ...(location !== undefined && { location }),
+      ...(startTime !== undefined && { startTime: zonedTimeToUtc(startTime, eventTimezone) }),
+      ...(endTime !== undefined && { endTime: endTime ? zonedTimeToUtc(endTime, eventTimezone) : null }),
+      ...(timezone !== undefined && { timezone }),
+      ...(isPublic !== undefined && { isPublic }),
+    };
+
     const updatedEvent = await prisma.event.update({
       where: { id },
-      data: {
-        ...(title !== undefined && { title }),
-        ...(description !== undefined && { description }),
-        ...(location !== undefined && { location }),
-        ...(startTime !== undefined && { startTime: new Date(startTime) }),
-        ...(endTime !== undefined && { endTime: endTime ? new Date(endTime) : null }),
-        ...(timezone !== undefined && { timezone }),
-        ...(isPublic !== undefined && { isPublic }),
-      },
+      data: updateData,
       include: {
         club: {
           select: {
