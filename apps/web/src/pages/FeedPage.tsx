@@ -38,8 +38,13 @@ export default function FeedPage() {
       const postItems = feedData.filter((item: FeedItem) => item.type === 'post') as Post[];
       const eventItems = feedData.filter((item: FeedItem) => item.type === 'event');
 
+      // Sort events by start time (soonest first)
+      const sortedEvents = eventItems.sort((a: any, b: any) => {
+        return new Date(a.startTime).getTime() - new Date(b.startTime).getTime();
+      });
+
       setPosts(postItems);
-      setEvents(eventItems);
+      setEvents(sortedEvents);
       setReviews(recentReviews);
       setCurrentUserId(currentUser?.id || null);
       setClubs(userClubs);
