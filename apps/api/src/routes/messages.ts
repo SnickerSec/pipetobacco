@@ -11,12 +11,17 @@ router.get('/conversations', authenticate, async (req: AuthRequest, res) => {
   try {
     const userId = req.user!.userId;
 
-    // Find all conversations where user is a participant
+    // Find all conversations where user is a participant (direct or group)
     const conversations = await prisma.conversation.findMany({
       where: {
         OR: [
           { participant1Id: userId },
           { participant2Id: userId },
+          {
+            participants: {
+              some: { userId }
+            }
+          }
         ],
       },
       include: {
@@ -51,11 +56,51 @@ router.get('/conversations', authenticate, async (req: AuthRequest, res) => {
     // Get the other participant's details for each conversation
     const conversationsWithParticipants = await Promise.all(
       conversations.map(async (conv) => {
+        // Handle GROUP conversations (clubs)
+        if (conv.type === 'GROUP' && conv.clubId) {
+          const club = await prisma.club.findUnique({
+            where: { id: conv.clubId },
+            select: {
+              id: true,
+              name: true,
+              slug: true,
+              avatarUrl: true,
+            },
+          });
+
+          // Count unread messages for group
+          const participant = await prisma.conversationParticipant.findUnique({
+            where: {
+              conversationId_userId: {
+                conversationId: conv.id,
+                userId,
+              },
+            },
+          });
+
+          const unreadCount = await prisma.message.count({
+            where: {
+              conversationId: conv.id,
+              senderId: { not: userId },
+              createdAt: participant?.lastReadAt
+                ? { gt: participant.lastReadAt }
+                : undefined,
+            },
+          });
+
+          return {
+            ...conv,
+            club,
+            unreadCount,
+          };
+        }
+
+        // Handle DIRECT conversations
         const otherParticipantId =
           conv.participant1Id === userId ? conv.participant2Id : conv.participant1Id;
 
         const otherParticipant = await prisma.user.findUnique({
-          where: { id: otherParticipantId },
+          where: { id: otherParticipantId! },
           select: {
             id: true,
             username: true,
@@ -297,6 +342,303 @@ router.post('/conversations/:conversationId/read', authenticate, async (req: Aut
     res.json({ message: 'Messages marked as read' });
   } catch (error) {
     console.error('Error marking messages as read:', error);
+    res.status(500).json({ error: 'Failed to mark messages as read' });
+  }
+});
+
+// Get or create club conversation
+router.get('/clubs/:slug/conversation', authenticate, async (req: AuthRequest, res) => {
+  try {
+    const userId = req.user!.userId;
+    const { slug } = req.params;
+
+    // Find the club
+    const club = await prisma.club.findUnique({
+      where: { slug },
+      include: {
+        members: {
+          where: { userId },
+        },
+      },
+    });
+
+    if (!club) {
+      return res.status(404).json({ error: 'Club not found' });
+    }
+
+    // Check if user is a member
+    if (club.members.length === 0) {
+      return res.status(403).json({ error: 'You must be a member to access club messages' });
+    }
+
+    // Try to find existing conversation
+    let conversation = await prisma.conversation.findFirst({
+      where: {
+        type: 'GROUP',
+        clubId: club.id,
+      },
+      include: {
+        messages: {
+          orderBy: { createdAt: 'asc' },
+          include: {
+            sender: {
+              select: {
+                id: true,
+                username: true,
+                displayName: true,
+                avatarUrl: true,
+                isVerified: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    // Create conversation if it doesn't exist
+    if (!conversation) {
+      conversation = await prisma.conversation.create({
+        data: {
+          type: 'GROUP',
+          clubId: club.id,
+        },
+        include: {
+          messages: {
+            orderBy: { createdAt: 'asc' },
+            include: {
+              sender: {
+                select: {
+                  id: true,
+                  username: true,
+                  displayName: true,
+                  avatarUrl: true,
+                  isVerified: true,
+                },
+              },
+            },
+          },
+        },
+      });
+
+      // Add all club members as participants
+      const members = await prisma.clubMember.findMany({
+        where: { clubId: club.id },
+        select: { userId: true },
+      });
+
+      await prisma.conversationParticipant.createMany({
+        data: members.map((member) => ({
+          conversationId: conversation!.id,
+          userId: member.userId,
+        })),
+      });
+    } else {
+      // Ensure current user is a participant (in case they joined after conversation was created)
+      const existingParticipant = await prisma.conversationParticipant.findUnique({
+        where: {
+          conversationId_userId: {
+            conversationId: conversation.id,
+            userId,
+          },
+        },
+      });
+
+      if (!existingParticipant) {
+        await prisma.conversationParticipant.create({
+          data: {
+            conversationId: conversation.id,
+            userId,
+          },
+        });
+      }
+    }
+
+    res.json({
+      ...conversation,
+      club: {
+        id: club.id,
+        name: club.name,
+        slug: club.slug,
+        avatarUrl: club.avatarUrl,
+      },
+    });
+  } catch (error) {
+    console.error('Error fetching club conversation:', error);
+    res.status(500).json({ error: 'Failed to fetch club conversation' });
+  }
+});
+
+// Send message to club
+router.post('/clubs/:slug/conversation/messages', authenticate, async (req: AuthRequest, res) => {
+  try {
+    const userId = req.user!.userId;
+    const { slug } = req.params;
+    const { content } = req.body;
+
+    if (!content || content.trim().length === 0) {
+      return res.status(400).json({ error: 'Message content is required' });
+    }
+
+    // Find the club
+    const club = await prisma.club.findUnique({
+      where: { slug },
+      include: {
+        members: {
+          where: { userId },
+        },
+      },
+    });
+
+    if (!club) {
+      return res.status(404).json({ error: 'Club not found' });
+    }
+
+    // Check if user is a member
+    if (club.members.length === 0) {
+      return res.status(403).json({ error: 'You must be a member to send messages' });
+    }
+
+    // Find or create conversation
+    let conversation = await prisma.conversation.findFirst({
+      where: {
+        type: 'GROUP',
+        clubId: club.id,
+      },
+    });
+
+    if (!conversation) {
+      conversation = await prisma.conversation.create({
+        data: {
+          type: 'GROUP',
+          clubId: club.id,
+        },
+      });
+
+      // Add all club members as participants
+      const members = await prisma.clubMember.findMany({
+        where: { clubId: club.id },
+        select: { userId: true },
+      });
+
+      await prisma.conversationParticipant.createMany({
+        data: members.map((member) => ({
+          conversationId: conversation!.id,
+          userId: member.userId,
+        })),
+      });
+    }
+
+    // Create the message
+    const message = await prisma.message.create({
+      data: {
+        content,
+        conversationId: conversation.id,
+        senderId: userId,
+      },
+      include: {
+        sender: {
+          select: {
+            id: true,
+            username: true,
+            displayName: true,
+            avatarUrl: true,
+            isVerified: true,
+          },
+        },
+      },
+    });
+
+    // Update conversation's lastMessageAt
+    await prisma.conversation.update({
+      where: { id: conversation.id },
+      data: { lastMessageAt: new Date() },
+    });
+
+    // Send notifications to all members except sender
+    const members = await prisma.clubMember.findMany({
+      where: {
+        clubId: club.id,
+        userId: { not: userId },
+      },
+      select: { userId: true },
+    });
+
+    const notificationPromises = members.map((member) =>
+      createNotification({
+        userId: member.userId,
+        type: 'NEW_MESSAGE',
+        title: `New message in ${club.name}`,
+        message: `${message.sender.displayName || message.sender.username} sent a message`,
+        linkUrl: `/clubs/${slug}/messages`,
+      }).catch((err) => console.error('Error sending notification:', err))
+    );
+
+    await Promise.all(notificationPromises);
+
+    res.status(201).json(message);
+  } catch (error) {
+    console.error('Error sending club message:', error);
+    res.status(500).json({ error: 'Failed to send message' });
+  }
+});
+
+// Mark club messages as read
+router.post('/clubs/:slug/conversation/read', authenticate, async (req: AuthRequest, res) => {
+  try {
+    const userId = req.user!.userId;
+    const { slug } = req.params;
+
+    // Find the club
+    const club = await prisma.club.findUnique({
+      where: { slug },
+      include: {
+        members: {
+          where: { userId },
+        },
+      },
+    });
+
+    if (!club) {
+      return res.status(404).json({ error: 'Club not found' });
+    }
+
+    if (club.members.length === 0) {
+      return res.status(403).json({ error: 'Not authorized' });
+    }
+
+    // Find conversation
+    const conversation = await prisma.conversation.findFirst({
+      where: {
+        type: 'GROUP',
+        clubId: club.id,
+      },
+    });
+
+    if (!conversation) {
+      return res.status(404).json({ error: 'Conversation not found' });
+    }
+
+    // Update participant's lastReadAt
+    await prisma.conversationParticipant.upsert({
+      where: {
+        conversationId_userId: {
+          conversationId: conversation.id,
+          userId,
+        },
+      },
+      update: {
+        lastReadAt: new Date(),
+      },
+      create: {
+        conversationId: conversation.id,
+        userId,
+        lastReadAt: new Date(),
+      },
+    });
+
+    res.json({ message: 'Messages marked as read' });
+  } catch (error) {
+    console.error('Error marking club messages as read:', error);
     res.status(500).json({ error: 'Failed to mark messages as read' });
   }
 });

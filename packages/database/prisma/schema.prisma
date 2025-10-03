@@ -374,20 +374,50 @@ model EventRSVP {
 // DIRECT MESSAGING
 // ============================================================================
 
+enum ConversationType {
+  DIRECT
+  GROUP
+}
+
 model Conversation {
-  id             String    @id @default(cuid())
-  participant1Id String
-  participant2Id String
+  id             String           @id @default(cuid())
+  type           ConversationType @default(DIRECT)
+
+  // For DIRECT conversations (1-on-1)
+  participant1Id String?
+  participant2Id String?
+
+  // For GROUP conversations (club messaging)
+  clubId         String?
+
   lastMessageAt  DateTime  @default(now())
   createdAt      DateTime  @default(now())
   updatedAt      DateTime  @updatedAt
 
   messages       Message[]
+  participants   ConversationParticipant[]
 
   @@unique([participant1Id, participant2Id])
   @@index([participant1Id])
   @@index([participant2Id])
+  @@index([clubId])
   @@index([lastMessageAt])
+  @@index([type])
+}
+
+// Track participants in group conversations and read status
+model ConversationParticipant {
+  id             String       @id @default(cuid())
+  conversationId String
+  userId         String
+  lastReadAt     DateTime?
+  joinedAt       DateTime     @default(now())
+
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+
+  @@unique([conversationId, userId])
+  @@index([conversationId])
+  @@index([userId])
 }
 
 model Message {
@@ -395,13 +425,16 @@ model Message {
   content        String       @db.Text
   conversationId String
   senderId       String
-  receiverId     String
+
+  // For DIRECT messages only
+  receiverId     String?
   isRead         Boolean      @default(false)
+
   createdAt      DateTime     @default(now())
 
   conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
   sender         User         @relation("MessageSender", fields: [senderId], references: [id], onDelete: Cascade)
-  receiver       User         @relation("MessageReceiver", fields: [receiverId], references: [id], onDelete: Cascade)
+  receiver       User?        @relation("MessageReceiver", fields: [receiverId], references: [id], onDelete: Cascade)
 
   @@index([conversationId])
   @@index([senderId])

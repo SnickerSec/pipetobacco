@@ -21,6 +21,8 @@ import FeedPage from './pages/FeedPage';
 import PostDetailPage from './pages/PostDetailPage';
 import ClubsPage from './pages/ClubsPage';
 import ClubPage from './pages/ClubPage';
+import ClubSettingsPage from './pages/ClubSettingsPage';
+import ClubMessagesPage from './pages/ClubMessagesPage';
 import ClubInvitePage from './pages/ClubInvitePage';
 import EventsPage from './pages/event/EventsPage';
 import EventDetailPage from './pages/event/EventDetailPage';
@@ -59,6 +61,8 @@ function App() {
           <Route path="/settings/notifications" element={<NotificationSettingsPage />} />
           <Route path="/clubs" element={<ClubsPage />} />
           <Route path="/clubs/:slug" element={<ClubPage />} />
+          <Route path="/clubs/:slug/settings" element={<ClubSettingsPage />} />
+          <Route path="/clubs/:slug/messages" element={<ClubMessagesPage />} />
           <Route path="/clubs/invites/:token" element={<ClubInvitePage />} />
           <Route path="/events" element={<EventsPage />} />
           <Route path="/events/:id" element={<EventDetailPage />} />

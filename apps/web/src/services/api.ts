@@ -646,6 +646,43 @@ class ApiService {
     return response.json();
   }
 
+  async getClubConversation(slug: string): Promise<any> {
+    const response = await fetch(`${API_BASE_URL}/api/messages/clubs/${slug}/conversation`, {
+      headers: this.getAuthHeaders(),
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to fetch club conversation');
+    }
+
+    return response.json();
+  }
+
+  async sendClubMessage(slug: string, content: string): Promise<any> {
+    const response = await fetch(`${API_BASE_URL}/api/messages/clubs/${slug}/conversation/messages`, {
+      method: 'POST',
+      headers: this.getAuthHeaders(),
+      body: JSON.stringify({ content }),
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to send club message');
+    }
+
+    return response.json();
+  }
+
+  async markClubMessagesRead(slug: string): Promise<void> {
+    const response = await fetch(`${API_BASE_URL}/api/messages/clubs/${slug}/conversation/read`, {
+      method: 'POST',
+      headers: this.getAuthHeaders(),
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to mark club messages as read');
+    }
+  }
+
   async getConversation(username: string): Promise<any> {
     const response = await fetch(`${API_BASE_URL}/api/messages/conversations/${username}`, {
       headers: this.getAuthHeaders(),
