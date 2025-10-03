@@ -323,6 +323,7 @@ model Event {
   // Timing
   startTime   DateTime
   endTime     DateTime?
+  timezone    String?  @default("America/New_York")
 
   // Club association
   clubId      String

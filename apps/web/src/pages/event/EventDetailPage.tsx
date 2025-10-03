@@ -49,6 +49,7 @@ export default function EventDetailPage() {
   const [editLocation, setEditLocation] = useState('');
   const [editStartTime, setEditStartTime] = useState('');
   const [editEndTime, setEditEndTime] = useState('');
+  const [editTimezone, setEditTimezone] = useState('America/New_York');
   const [editIsPublic, setEditIsPublic] = useState(true);
   const [isUpdating, setIsUpdating] = useState(false);
   const [updateError, setUpdateError] = useState<string | null>(null);
@@ -107,6 +108,7 @@ export default function EventDetailPage() {
     setEditLocation(event.location || '');
     setEditStartTime(new Date(event.startTime).toISOString().slice(0, 16));
     setEditEndTime(event.endTime ? new Date(event.endTime).toISOString().slice(0, 16) : '');
+    setEditTimezone((event as any).timezone || 'America/New_York');
     setEditIsPublic(event.isPublic);
     setShowEditModal(true);
   };
@@ -125,6 +127,7 @@ export default function EventDetailPage() {
         location: editLocation || null,
         startTime: editStartTime,
         endTime: editEndTime || null,
+        timezone: editTimezone,
         isPublic: editIsPublic,
       });
 
@@ -444,6 +447,31 @@ export default function EventDetailPage() {
                   onChange={(e) => setEditEndTime(e.target.value)}
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
                 />
+              </div>
+
+              {/* Timezone */}
+              <div>
+                <label htmlFor="edit-timezone" className="block text-sm font-medium text-gray-700 mb-1">
+                  Timezone *
+                </label>
+                <select
+                  id="edit-timezone"
+                  value={editTimezone}
+                  onChange={(e) => setEditTimezone(e.target.value)}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                  required
+                >
+                  <option value="America/New_York">Eastern Time (ET)</option>
+                  <option value="America/Chicago">Central Time (CT)</option>
+                  <option value="America/Denver">Mountain Time (MT)</option>
+                  <option value="America/Los_Angeles">Pacific Time (PT)</option>
+                  <option value="America/Anchorage">Alaska Time (AKT)</option>
+                  <option value="Pacific/Honolulu">Hawaii Time (HT)</option>
+                  <option value="Europe/London">London (GMT)</option>
+                  <option value="Europe/Paris">Central European Time (CET)</option>
+                  <option value="Asia/Tokyo">Tokyo (JST)</option>
+                  <option value="Australia/Sydney">Sydney (AEST)</option>
+                </select>
               </div>
 
               {/* Public/Private */}

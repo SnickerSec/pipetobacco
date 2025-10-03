@@ -52,6 +52,7 @@ export default function EventsPage() {
   const [location, setLocation] = useState('');
   const [startTime, setStartTime] = useState('');
   const [endTime, setEndTime] = useState('');
+  const [timezone, setTimezone] = useState('America/New_York');
   const [isPublic, setIsPublic] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -122,6 +123,7 @@ export default function EventsPage() {
         location: location || null,
         startTime,
         endTime: endTime || null,
+        timezone,
         isPublic,
       });
 
@@ -470,6 +472,31 @@ export default function EventsPage() {
                   onChange={(e) => setEndTime(e.target.value)}
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
                 />
+              </div>
+
+              {/* Timezone */}
+              <div>
+                <label htmlFor="timezone" className="block text-sm font-medium text-gray-700 mb-1">
+                  Timezone *
+                </label>
+                <select
+                  id="timezone"
+                  value={timezone}
+                  onChange={(e) => setTimezone(e.target.value)}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                  required
+                >
+                  <option value="America/New_York">Eastern Time (ET)</option>
+                  <option value="America/Chicago">Central Time (CT)</option>
+                  <option value="America/Denver">Mountain Time (MT)</option>
+                  <option value="America/Los_Angeles">Pacific Time (PT)</option>
+                  <option value="America/Anchorage">Alaska Time (AKT)</option>
+                  <option value="Pacific/Honolulu">Hawaii Time (HT)</option>
+                  <option value="Europe/London">London (GMT)</option>
+                  <option value="Europe/Paris">Central European Time (CET)</option>
+                  <option value="Asia/Tokyo">Tokyo (JST)</option>
+                  <option value="Australia/Sydney">Sydney (AEST)</option>
+                </select>
               </div>
 
               {/* Public/Private */}

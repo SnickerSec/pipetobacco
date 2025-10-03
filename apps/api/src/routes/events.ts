@@ -122,7 +122,7 @@ router.post('/clubs/:slug/events', authenticate, async (req: AuthRequest, res) =
   try {
     const { slug } = req.params;
     const userId = req.user!.userId;
-    const { title, description, location, startTime, endTime, isPublic } = req.body;
+    const { title, description, location, startTime, endTime, timezone, isPublic } = req.body;
 
     // Validate required fields
     if (!title || !startTime) {
@@ -155,6 +155,7 @@ router.post('/clubs/:slug/events', authenticate, async (req: AuthRequest, res) =
         location,
         startTime: new Date(startTime),
         endTime: endTime ? new Date(endTime) : null,
+        timezone: timezone || 'America/New_York',
         isPublic: isPublic !== undefined ? isPublic : true,
         clubId: club.id,
         creatorId: userId,
@@ -191,7 +192,7 @@ router.patch('/events/:id', authenticate, async (req: AuthRequest, res) => {
   try {
     const { id } = req.params;
     const userId = req.user!.userId;
-    const { title, description, location, startTime, endTime, isPublic } = req.body;
+    const { title, description, location, startTime, endTime, timezone, isPublic } = req.body;
 
     // Find the event with creator and club info
     const event = await prisma.event.findUnique({
@@ -228,6 +229,7 @@ router.patch('/events/:id', authenticate, async (req: AuthRequest, res) => {
         ...(location !== undefined && { location }),
         ...(startTime !== undefined && { startTime: new Date(startTime) }),
         ...(endTime !== undefined && { endTime: endTime ? new Date(endTime) : null }),
+        ...(timezone !== undefined && { timezone }),
         ...(isPublic !== undefined && { isPublic }),
       },
       include: {
