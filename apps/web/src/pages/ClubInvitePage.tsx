@@ -160,8 +160,10 @@ export default function ClubInvitePage() {
 
           {/* Invitation Details */}
           <div className="mb-6 text-sm text-gray-600">
-            <p>Invited to: <span className="font-medium">{invite.email}</span></p>
-            <p className="mt-1">
+            {invite.email !== 'invite@placeholder.com' && (
+              <p>Invited to: <span className="font-medium">{invite.email}</span></p>
+            )}
+            <p className={invite.email !== 'invite@placeholder.com' ? 'mt-1' : ''}>
               Expires: <span className="font-medium">{expiresAt.toLocaleDateString('en-US', {
                 month: 'long',
                 day: 'numeric',

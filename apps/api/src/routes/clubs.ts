@@ -724,8 +724,9 @@ router.post('/invites/:token/accept', authenticate, async (req: AuthRequest, res
       return res.status(404).json({ error: 'User not found' });
     }
 
-    // Check if user email matches invitation
-    if (user.email !== invitation.email) {
+    // Check if user email matches invitation (unless it's a shareable link with placeholder email)
+    const isShareableLink = invitation.email === 'invite@placeholder.com';
+    if (!isShareableLink && user.email !== invitation.email) {
       return res.status(403).json({ error: 'This invitation is for a different email address' });
     }
 

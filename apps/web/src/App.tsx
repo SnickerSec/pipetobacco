@@ -64,6 +64,7 @@ function App() {
               <Route path="/clubs/:slug" element={<ClubPage />} />
               <Route path="/clubs/:slug/settings" element={<ClubSettingsPage />} />
               <Route path="/clubs/:slug/messages" element={<ClubMessagesPage />} />
+              <Route path="/clubs/:slug/invite/:token" element={<ClubInvitePage />} />
               <Route path="/clubs/invites/:token" element={<ClubInvitePage />} />
               <Route path="/events" element={<EventsPage />} />
               <Route path="/events/:id" element={<EventDetailPage />} />
