@@ -37,6 +37,14 @@ export default function PostCard({ post, onPostDeleted, currentUserId }: PostCar
   const [showReportModal, setShowReportModal] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
+  // Auto-expand comments if post has comments
+  useEffect(() => {
+    if (commentCount > 0 && !showComments) {
+      setShowComments(true);
+      loadComments();
+    }
+  }, []); // Only run once on mount
+
   // Close menu when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
