@@ -17,12 +17,16 @@ COPY packages ./packages
 # Install all dependencies
 RUN npm ci
 
-# Debug: Check workspace setup before building API
+# Build workspace dependencies FIRST (database and types packages)
+RUN npm run prisma:generate -w packages/database && \
+    npm run build -w packages/database && \
+    npm run build -w packages/types
+
+# Debug: Check workspace setup after building dependencies
 RUN echo "=== Pre-build diagnostics ===" && \
-    echo "1. Node modules @ember-society:" && ls -la node_modules/@ember-society/ && \
-    echo "2. Database package.json:" && cat node_modules/@ember-society/database/package.json && \
-    echo "3. Database dist:" && ls -la node_modules/@ember-society/database/dist/ && \
-    echo "4. Types dist:" && ls -la node_modules/@ember-society/types/dist/
+    echo "1. Database dist:" && ls -la packages/database/dist/ && \
+    echo "2. Types dist:" && ls -la packages/types/dist/ && \
+    echo "3. Verify symlinks work:" && ls -la node_modules/@ember-society/database/dist/
 
 # Build the API
 RUN npm run build -w apps/api
