@@ -7,4 +7,4 @@ key = "NODE_ENV"
 value = "development"
 
 [deploy]
-startCommand = "cd packages/database && npx prisma migrate deploy && cd ../.. && npm run start -w apps/api"
+startCommand = "ls -la apps/api/ && ls -la apps/api/dist/ && cd packages/database && npx prisma migrate deploy && cd ../.. && npm run start -w apps/api"
