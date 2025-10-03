@@ -67,7 +67,9 @@ router.post('/', authenticate, upload.single('file'), async (req: AuthRequest, r
     }
 
     // Construct the URL for accessing the file
-    const fileUrl = `${req.protocol}://${req.get('host')}/uploads/${req.file.filename}`;
+    // Always use https in production (Railway uses a reverse proxy)
+    const protocol = process.env.NODE_ENV === 'production' ? 'https' : req.protocol;
+    const fileUrl = `${protocol}://${req.get('host')}/uploads/${req.file.filename}`;
 
     res.json({
       url: fileUrl,
