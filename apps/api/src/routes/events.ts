@@ -77,6 +77,9 @@ router.get('/events/:id', optionalAuth, async (req: AuthRequest, res) => {
           },
         },
         rsvps: {
+          where: {
+            status: 'GOING',
+          },
           include: {
             user: {
               select: {
