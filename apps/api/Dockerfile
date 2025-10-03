@@ -17,8 +17,8 @@ RUN npm ci
 # Build the API
 RUN npm run build -w apps/api
 
-# Verify the build worked
-RUN ls -la apps/api/dist || (echo "ERROR: dist directory not created" && exit 1)
+# Verify the build worked - show what's actually in dist
+RUN echo "Contents of apps/api/dist:" && ls -la apps/api/dist/ && echo "Files in dist:" && find apps/api/dist -type f
 
 # Set working directory to apps/api for npm workspace command to work
 WORKDIR /app
