@@ -11,14 +11,11 @@ export default function PublicLayout() {
               <span className="text-2xl text-ember-600" style={{ fontFamily: '"Brush Script MT", "Lucida Handwriting", cursive', fontWeight: 400 }}>The Ember Society</span>
             </a>
             <div className="flex items-center space-x-4">
-              <a href="/login" className="text-tobacco-700 hover:text-ember-600 font-medium">
-                Login
-              </a>
               <a
-                href="/register"
+                href="/login"
                 className="bg-ember-600 text-white px-4 py-2 rounded-lg hover:bg-ember-700 font-medium"
               >
-                Sign Up
+                Sign In
               </a>
             </div>
           </div>
