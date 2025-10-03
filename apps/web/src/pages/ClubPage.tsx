@@ -131,28 +131,28 @@ export default function ClubPage() {
           </div>
         )}
 
-        <div className="p-6">
-          <div className="flex items-start justify-between">
+        <div className="p-4 sm:p-6">
+          <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
             {/* Club Info */}
             <div className="flex items-center">
               {club.avatarUrl && (
                 <img
                   src={club.avatarUrl}
                   alt={club.name}
-                  className="h-20 w-20 rounded-lg"
+                  className="h-16 w-16 sm:h-20 sm:w-20 rounded-lg flex-shrink-0"
                 />
               )}
-              <div className={club.avatarUrl ? 'ml-4' : ''}>
-                <h1 className="text-3xl font-bold text-gray-900">
+              <div className={club.avatarUrl ? 'ml-3 sm:ml-4' : ''}>
+                <h1 className="text-xl sm:text-3xl font-bold text-gray-900">
                   {club.name}
                   {club.isPrivate && (
-                    <span className="ml-2 text-sm font-normal text-gray-500">
+                    <span className="ml-2 text-xs sm:text-sm font-normal text-gray-500">
                       🔒 Private
                     </span>
                   )}
                 </h1>
-                <p className="text-gray-600">/clubs/{club.slug}</p>
-                <div className="flex items-center space-x-4 mt-2 text-sm text-gray-500">
+                <p className="text-sm sm:text-base text-gray-600">/clubs/{club.slug}</p>
+                <div className="flex items-center space-x-2 sm:space-x-4 mt-2 text-xs sm:text-sm text-gray-500">
                   <span>{club.memberCount} {club.memberCount === 1 ? 'member' : 'members'}</span>
                   <span>•</span>
                   <span>{club._count.posts} {club._count.posts === 1 ? 'post' : 'posts'}</span>
@@ -161,13 +161,13 @@ export default function ClubPage() {
             </div>
 
             {/* Action Buttons */}
-            <div className="flex items-center space-x-2">
+            <div className="flex flex-wrap items-center gap-2">
               {isMember && (
                 <button
                   onClick={() => navigate(`/clubs/${slug}/messages`)}
-                  className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 flex items-center gap-2"
+                  className="px-3 sm:px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 flex items-center gap-2 text-sm"
                 >
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path
                       strokeLinecap="round"
                       strokeLinejoin="round"
@@ -184,14 +184,14 @@ export default function ClubPage() {
                     <button
                       onClick={handleJoinClub}
                       disabled={isJoining}
-                      className="px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 disabled:opacity-50"
+                      className="px-3 sm:px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 disabled:opacity-50 text-sm"
                     >
                       {isJoining ? 'Joining...' : 'Join Club'}
                     </button>
                   ) : (
                     <button
                       disabled
-                      className="px-4 py-2 bg-gray-400 text-white rounded-lg cursor-not-allowed"
+                      className="px-3 sm:px-4 py-2 bg-gray-400 text-white rounded-lg cursor-not-allowed text-sm"
                     >
                       Joined
                     </button>
@@ -203,7 +203,7 @@ export default function ClubPage() {
                 <button
                   onClick={handleLeaveClub}
                   disabled={isLeaving}
-                  className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 disabled:opacity-50"
+                  className="px-3 sm:px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 disabled:opacity-50 text-sm"
                 >
                   {isLeaving ? 'Leaving...' : 'Leave Club'}
                 </button>
@@ -212,7 +212,7 @@ export default function ClubPage() {
               {isAdmin && (
                 <button
                   onClick={() => navigate(`/clubs/${slug}/settings`)}
-                  className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50"
+                  className="px-3 sm:px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 text-sm"
                 >
                   Settings
                 </button>
