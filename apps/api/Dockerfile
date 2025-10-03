@@ -6,10 +6,10 @@ RUN apk add --no-cache openssl
 WORKDIR /app
 
 # Copy from monorepo root (Railway sets context to repo root)
-COPY ../../package*.json ./
-COPY ../../apps/api ./apps/api
-COPY ../../apps/web/package.json ./apps/web/package.json
-COPY ../../packages ./packages
+COPY package*.json ./
+COPY apps/api ./apps/api
+COPY apps/web/package.json ./apps/web/package.json
+COPY packages ./packages
 
 # Install all dependencies
 RUN npm ci
