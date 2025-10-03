@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import * as db from '@ember-society/database';
 import { authenticate, AuthRequest } from '../middleware/auth.js';
+import { notifyMentionedUsers } from '../services/notificationService.js';
 
 const router = Router();
 const prisma = db.prisma;
@@ -165,6 +166,13 @@ router.post('/', authenticate, async (req: AuthRequest, res) => {
       },
     });
 
+    // Send notifications to mentioned users
+    notifyMentionedUsers(content, authorId, {
+      title: 'You were mentioned in a review',
+      message: `${review.author.displayName || review.author.username} mentioned you in a review of ${productName}`,
+      linkUrl: `/reviews`,
+    }).catch((err) => console.error('Error sending mention notifications:', err));
+
     res.status(201).json(review);
   } catch (error) {
     console.error('Error creating review:', error);
@@ -228,6 +236,15 @@ router.patch('/:reviewId', authenticate, async (req: AuthRequest, res) => {
         },
       },
     });
+
+    // Send notifications to mentioned users if content was updated
+    if (content !== undefined) {
+      notifyMentionedUsers(content, userId, {
+        title: 'You were mentioned in a review',
+        message: `${updatedReview.author.displayName || updatedReview.author.username} mentioned you in a review of ${updatedReview.productName}`,
+        linkUrl: `/reviews`,
+      }).catch((err) => console.error('Error sending mention notifications:', err));
+    }
 
     res.json(updatedReview);
   } catch (error) {
