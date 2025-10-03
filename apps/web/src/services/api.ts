@@ -369,9 +369,7 @@ class ApiService {
       headers: this.getAuthHeaders(),
     });
 
-    if (!response.ok) {
-      throw new Error('Failed to delete post');
-    }
+    await this.handleResponse(response);
   }
 
   async likePost(postId: string): Promise<void> {
@@ -380,9 +378,7 @@ class ApiService {
       headers: this.getAuthHeaders(),
     });
 
-    if (!response.ok) {
-      throw new Error('Failed to like post');
-    }
+    await this.handleResponse(response);
   }
 
   async unlikePost(postId: string): Promise<void> {
@@ -391,21 +387,18 @@ class ApiService {
       headers: this.getAuthHeaders(),
     });
 
-    if (!response.ok) {
-      throw new Error('Failed to unlike post');
-    }
+    await this.handleResponse(response);
   }
 
   async getComments(postId: string, limit = 20, offset = 0) {
     const response = await fetch(
-      `${API_BASE_URL}/api/posts/${postId}/comments?limit=${limit}&offset=${offset}`
+      `${API_BASE_URL}/api/posts/${postId}/comments?limit=${limit}&offset=${offset}`,
+      {
+        headers: this.getAuthHeaders(),
+      }
     );
 
-    if (!response.ok) {
-      throw new Error('Failed to fetch comments');
-    }
-
-    return response.json();
+    return this.handleResponse(response);
   }
 
   async createComment(postId: string, content: string) {
