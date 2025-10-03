@@ -17,6 +17,7 @@ export default function FeedPage() {
   const navigate = useNavigate();
   const [posts, setPosts] = useState<Post[]>([]);
   const [events, setEvents] = useState<any[]>([]);
+  const [reviews, setReviews] = useState<any[]>([]);
   const [clubs, setClubs] = useState<Club[]>([]);
   const [selectedClubId, setSelectedClubId] = useState<string>('');
   const [loading, setLoading] = useState(true);
@@ -26,10 +27,11 @@ export default function FeedPage() {
   const fetchData = async () => {
     try {
       setLoading(true);
-      const [feedData, currentUser, userClubs] = await Promise.all([
+      const [feedData, currentUser, userClubs, recentReviews] = await Promise.all([
         api.getFeed(),
         api.getCurrentUser().catch(() => null),
         api.getMyClubs().catch(() => []),
+        api.getReviews({ limit: 3 }).catch(() => []),
       ]);
 
       // Separate posts and events
@@ -38,6 +40,7 @@ export default function FeedPage() {
 
       setPosts(postItems);
       setEvents(eventItems);
+      setReviews(recentReviews);
       setCurrentUserId(currentUser?.id || null);
       setClubs(userClubs);
 
@@ -169,9 +172,10 @@ export default function FeedPage() {
           )}
         </div>
 
-        {/* Sidebar - Events (Right Column) */}
+        {/* Sidebar - Events & Reviews (Right Column) */}
         <div className="lg:col-span-4">
           <div className="sticky top-4 space-y-4">
+            {/* Upcoming Events */}
             <div className="bg-white rounded-lg shadow p-4">
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-lg font-semibold text-gray-900">Upcoming Events</h2>
@@ -188,6 +192,53 @@ export default function FeedPage() {
                 <div className="space-y-3">
                   {events.slice(0, 5).map((event) => (
                     <EventCard key={event.id} event={event} compact />
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Recent Reviews */}
+            <div className="bg-white rounded-lg shadow p-4">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-lg font-semibold text-gray-900">Recent Reviews</h2>
+                <button
+                  onClick={() => navigate('/reviews')}
+                  className="text-sm text-orange-600 hover:text-orange-700"
+                >
+                  View All
+                </button>
+              </div>
+              {reviews.length === 0 ? (
+                <p className="text-sm text-gray-500 text-center py-4">No reviews yet</p>
+              ) : (
+                <div className="space-y-3">
+                  {reviews.map((review) => (
+                    <div
+                      key={review.id}
+                      onClick={() => navigate('/reviews')}
+                      className="border border-gray-200 rounded-lg p-3 hover:border-orange-300 hover:shadow-sm transition cursor-pointer"
+                    >
+                      <div className="flex items-start justify-between mb-2">
+                        <h3 className="font-semibold text-gray-900 text-sm line-clamp-1">
+                          {review.productName}
+                        </h3>
+                        <div className="flex items-center gap-1 ml-2 flex-shrink-0">
+                          <svg className="w-4 h-4 text-yellow-400 fill-current" viewBox="0 0 20 20">
+                            <path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z" />
+                          </svg>
+                          <span className="text-sm font-medium text-gray-700">{review.rating}</span>
+                        </div>
+                      </div>
+                      <p className="text-xs text-gray-600 line-clamp-2 mb-2">{review.title}</p>
+                      <div className="flex items-center gap-2 text-xs text-gray-500">
+                        <img
+                          src={review.author.avatarUrl || `https://ui-avatars.com/api/?name=${review.author.displayName || review.author.username}&size=20`}
+                          alt={review.author.username}
+                          className="w-5 h-5 rounded-full"
+                        />
+                        <span>{review.author.displayName || review.author.username}</span>
+                      </div>
+                    </div>
                   ))}
                 </div>
               )}

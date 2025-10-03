@@ -130,6 +130,21 @@ router.post('/clubs/:slug/events', authenticate, async (req: AuthRequest, res) =
       return res.status(400).json({ error: 'Title and start time are required' });
     }
 
+    // Validate that event is not in the past
+    const now = new Date();
+    const startTimeDate = new Date(startTime);
+    if (startTimeDate < now) {
+      return res.status(400).json({ error: 'Cannot create events in the past' });
+    }
+
+    // Validate end time is after start time if provided
+    if (endTime) {
+      const endTimeDate = new Date(endTime);
+      if (endTimeDate <= startTimeDate) {
+        return res.status(400).json({ error: 'End time must be after start time' });
+      }
+    }
+
     // Find the club
     const club = await prisma.club.findUnique({
       where: { slug },
@@ -225,6 +240,24 @@ router.patch('/events/:id', authenticate, async (req: AuthRequest, res) => {
 
     if (!isCreator && !isAdmin) {
       return res.status(403).json({ error: 'You do not have permission to edit this event' });
+    }
+
+    // Validate that updated start time is not in the past
+    if (startTime !== undefined) {
+      const now = new Date();
+      const startTimeDate = new Date(startTime);
+      if (startTimeDate < now) {
+        return res.status(400).json({ error: 'Cannot set event start time to the past' });
+      }
+    }
+
+    // Validate end time is after start time if both are provided
+    if (startTime !== undefined && endTime !== undefined) {
+      const startTimeDate = new Date(startTime);
+      const endTimeDate = new Date(endTime);
+      if (endTimeDate <= startTimeDate) {
+        return res.status(400).json({ error: 'End time must be after start time' });
+      }
     }
 
     // Use the new timezone if provided, otherwise use existing

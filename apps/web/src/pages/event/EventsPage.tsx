@@ -109,6 +109,23 @@ export default function EventsPage() {
       return;
     }
 
+    // Validate that event is not in the past
+    const now = new Date();
+    const startTimeDate = new Date(startTime);
+    if (startTimeDate < now) {
+      setError('Cannot create events in the past');
+      return;
+    }
+
+    // Validate end time is after start time if provided
+    if (endTime) {
+      const endTimeDate = new Date(endTime);
+      if (endTimeDate <= startTimeDate) {
+        setError('End time must be after start time');
+        return;
+      }
+    }
+
     setIsSubmitting(true);
     setError(null);
 
@@ -456,6 +473,7 @@ export default function EventsPage() {
                   id="startTime"
                   value={startTime}
                   onChange={(e) => setStartTime(e.target.value)}
+                  min={new Date().toISOString().slice(0, 16)}
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
                   required
                 />
@@ -471,6 +489,7 @@ export default function EventsPage() {
                   id="endTime"
                   value={endTime}
                   onChange={(e) => setEndTime(e.target.value)}
+                  min={startTime || new Date().toISOString().slice(0, 16)}
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
                 />
               </div>
