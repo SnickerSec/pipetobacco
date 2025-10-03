@@ -493,11 +493,10 @@ router.get('/:slug/posts', async (req: AuthRequest, res) => {
     }
 
     // Check if private and user is not a member
-    if (club.isPrivate) {
-      const isMember = userId && club.members && club.members.length > 0;
-      if (!isMember) {
-        return res.status(403).json({ error: 'This club is private' });
-      }
+    const isMember = userId && club.members && club.members.length > 0;
+    if (club.isPrivate && !isMember) {
+      // Return empty array instead of 403 for better UX
+      return res.json([]);
     }
 
     const posts = await prisma.post.findMany({
