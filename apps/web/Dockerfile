@@ -11,6 +11,10 @@ COPY packages ./packages
 # Install all dependencies
 RUN npm ci
 
+# Accept build arg for Vite environment variables
+ARG VITE_API_URL
+ENV VITE_API_URL=$VITE_API_URL
+
 # Build the web app
 RUN npm run build -w apps/web
 
