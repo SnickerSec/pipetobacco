@@ -102,7 +102,6 @@ export default function AuthenticatedLayout() {
     { path: '/reviews', icon: StarIcon, label: 'Reviews' },
     { path: '/events', icon: CalendarIcon, label: 'Events' },
     { path: '/messages', icon: ChatBubbleLeftIcon, label: 'Messages' },
-    { path: '/notifications', icon: BellIcon, label: 'Notifications' },
   ];
 
   return (
@@ -289,34 +288,43 @@ export default function AuthenticatedLayout() {
 
       {/* Mobile Bottom Navigation */}
       <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-tobacco-200 z-50">
-        <div className="flex items-center py-2">
-          {/* Hamburger Menu Button - Left */}
+        <div className="flex items-center justify-around py-2">
+          {/* Navigation Items */}
+          {navItems.map((item) => {
+            const Icon = item.icon;
+            return (
+              <Link
+                key={item.path}
+                to={item.path}
+                className={`flex flex-col items-center p-1 min-w-0 ${
+                  isActive(item.path) ? 'text-ember-600' : 'text-tobacco-600'
+                }`}
+              >
+                <Icon className="h-5 w-5" />
+                <span className="text-[10px] mt-0.5 leading-tight truncate max-w-full">{item.label}</span>
+              </Link>
+            );
+          })}
+
+          {/* Notifications */}
+          <Link
+            to="/notifications"
+            className={`flex flex-col items-center p-1 min-w-0 ${
+              isActive('/notifications') ? 'text-ember-600' : 'text-tobacco-600'
+            }`}
+          >
+            <BellIcon className="h-5 w-5" />
+            <span className="text-[10px] mt-0.5 leading-tight">Notifications</span>
+          </Link>
+
+          {/* Profile Menu Button - Right */}
           <button
             onClick={() => setShowMobileMenu(true)}
-            className="flex flex-col items-center p-1 min-w-0 text-tobacco-600 px-3"
+            className="flex flex-col items-center p-1 min-w-0 text-tobacco-600"
           >
-            <Bars3Icon className="h-5 w-5" />
-            <span className="text-[10px] mt-0.5 leading-tight">Menu</span>
+            <UserCircleIcon className="h-5 w-5" />
+            <span className="text-[10px] mt-0.5 leading-tight">Profile</span>
           </button>
-
-          {/* Navigation Items */}
-          <div className="flex items-center justify-around flex-1">
-            {navItems.map((item) => {
-              const Icon = item.icon;
-              return (
-                <Link
-                  key={item.path}
-                  to={item.path}
-                  className={`flex flex-col items-center p-1 min-w-0 ${
-                    isActive(item.path) ? 'text-ember-600' : 'text-tobacco-600'
-                  }`}
-                >
-                  <Icon className="h-5 w-5" />
-                  <span className="text-[10px] mt-0.5 leading-tight truncate max-w-full">{item.label}</span>
-                </Link>
-              );
-            })}
-          </div>
         </div>
       </nav>
 
