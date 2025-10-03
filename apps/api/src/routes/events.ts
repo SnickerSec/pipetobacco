@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import * as db from '@ember-society/database';
 import { authenticate, optionalAuth, AuthRequest } from '../middleware/auth.js';
-import { zonedTimeToUtc } from 'date-fns-tz';
+import { fromZonedTime } from 'date-fns-tz';
 
 const router = Router();
 const prisma = db.prisma;
@@ -151,8 +151,8 @@ router.post('/clubs/:slug/events', authenticate, async (req: AuthRequest, res) =
 
     // Parse the time as if it's in the event's timezone
     const eventTimezone = timezone || 'America/New_York';
-    const startTimeUtc = zonedTimeToUtc(startTime, eventTimezone);
-    const endTimeUtc = endTime ? zonedTimeToUtc(endTime, eventTimezone) : null;
+    const startTimeUtc = fromZonedTime(startTime, eventTimezone);
+    const endTimeUtc = endTime ? fromZonedTime(endTime, eventTimezone) : null;
 
     const event = await prisma.event.create({
       data: {
@@ -235,8 +235,8 @@ router.patch('/events/:id', authenticate, async (req: AuthRequest, res) => {
       ...(title !== undefined && { title }),
       ...(description !== undefined && { description }),
       ...(location !== undefined && { location }),
-      ...(startTime !== undefined && { startTime: zonedTimeToUtc(startTime, eventTimezone) }),
-      ...(endTime !== undefined && { endTime: endTime ? zonedTimeToUtc(endTime, eventTimezone) : null }),
+      ...(startTime !== undefined && { startTime: fromZonedTime(startTime, eventTimezone) }),
+      ...(endTime !== undefined && { endTime: endTime ? fromZonedTime(endTime, eventTimezone) : null }),
       ...(timezone !== undefined && { timezone }),
       ...(isPublic !== undefined && { isPublic }),
     };
