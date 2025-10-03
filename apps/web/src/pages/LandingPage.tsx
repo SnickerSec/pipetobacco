@@ -5,10 +5,10 @@ export default function LandingPage() {
       <section className="bg-gradient-to-br from-ember-50 to-tobacco-100 py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h1 className="text-5xl md:text-6xl font-bold text-tobacco-900 mb-6">
-            Welcome to <span className="font-serif italic text-ember-600">The Ember Society</span>
+            Welcome to <span className="text-ember-600">Herf Social</span>
           </h1>
           <p className="text-xl text-tobacco-700 mb-8 max-w-2xl mx-auto">
-            A dedicated community for pipe tobacco and cigar enthusiasts to connect,
+            A dedicated community for cigar and pipe tobacco enthusiasts to connect,
             share experiences, and discover new favorites.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">

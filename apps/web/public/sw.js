@@ -12,12 +12,12 @@ self.addEventListener('push', (event) => {
     data = event.data.json();
   } catch (e) {
     data = {
-      title: 'The Ember Society',
+      title: 'Herf Social',
       body: event.data.text(),
     };
   }
 
-  const title = data.title || 'The Ember Society';
+  const title = data.title || 'Herf Social';
   const options = {
     body: data.body || data.message || 'You have a new notification',
     icon: '/logo.png',

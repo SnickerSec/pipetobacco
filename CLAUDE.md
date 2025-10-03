@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-**The Ember Society** is a social networking platform for pipe tobacco and cigar enthusiasts, built as an npm workspaces monorepo with TypeScript throughout.
+**Herf Social** is a social networking platform for cigar and pipe tobacco enthusiasts, built as an npm workspaces monorepo with TypeScript throughout.
 
 ### Workspace Structure
 

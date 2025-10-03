@@ -1,5 +1,5 @@
-// Prisma Schema for The Ember Society
-// This is a foundational schema - will be expanded in Task 1.2
+// Prisma Schema for Herf Social
+// Cigar and pipe tobacco enthusiast community
 
 generator client {
   provider      = "prisma-client-js"

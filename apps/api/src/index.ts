@@ -50,7 +50,7 @@ app.get('/health', (req, res) => {
 
 // API routes
 app.get('/', (req, res) => {
-  res.json({ message: 'The Ember Society API' });
+  res.json({ message: 'Herf Social API' });
 });
 
 // Auth routes (OAuth) - imported after passport initialization

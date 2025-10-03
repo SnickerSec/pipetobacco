@@ -42,7 +42,7 @@ export default function ClubInviteManager({ clubSlug }: ClubInviteManagerProps) 
     const shareUrl = club?.isPrivate && inviteLink ? inviteLink : `${window.location.origin}/clubs/${clubSlug}`;
     const shareData = {
       title: 'Join my club!',
-      text: `Check out this club on The Ember Society`,
+      text: `Check out this club on Herf Social`,
       url: shareUrl,
     };
 

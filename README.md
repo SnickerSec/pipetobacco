@@ -1,6 +1,6 @@
-# The Ember Society
+# Herf Social
 
-A social networking platform for pipe tobacco and cigar enthusiasts.
+A social networking platform for cigar and pipe tobacco enthusiasts.
 
 ## Tech Stack
 
