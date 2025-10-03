@@ -18,6 +18,8 @@ export default function NotificationsPage() {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [showAll, setShowAll] = useState(false);
+  const [loadingMore, setLoadingMore] = useState(false);
 
   useEffect(() => {
     loadNotifications();
@@ -35,6 +37,10 @@ export default function NotificationsPage() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleShowMore = () => {
+    setShowAll(true);
   };
 
   const handleNotificationClick = async (notification: Notification) => {
@@ -115,6 +121,8 @@ export default function NotificationsPage() {
   }
 
   const unreadCount = notifications.filter((n) => !n.isRead).length;
+  const displayedNotifications = showAll ? notifications : notifications.slice(0, 5);
+  const hasMore = notifications.length > 5;
 
   return (
     <div className="max-w-2xl mx-auto">
@@ -148,39 +156,65 @@ export default function NotificationsPage() {
           <p className="text-gray-600">We'll notify you when something happens</p>
         </div>
       ) : (
-        <div className="bg-white rounded-lg shadow divide-y divide-gray-200">
-          {notifications.map((notification) => (
-            <div
-              key={notification.id}
-              onClick={() => handleNotificationClick(notification)}
-              className={`p-4 hover:bg-gray-50 cursor-pointer transition ${
-                !notification.isRead ? 'bg-blue-50' : ''
-              }`}
-            >
-              <div className="flex items-start space-x-3">
-                <div className="flex-shrink-0">
-                  <div className="h-10 w-10 rounded-full bg-orange-100 flex items-center justify-center text-xl">
-                    {getNotificationIcon(notification.type)}
-                  </div>
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-gray-900 font-medium">{notification.title}</p>
-                  {notification.message && (
-                    <p className="text-sm text-gray-700 mt-1">{notification.message}</p>
-                  )}
-                  <p className="text-xs text-gray-600 mt-1">
-                    {formatDistanceToNow(new Date(notification.createdAt), { addSuffix: true })}
-                  </p>
-                </div>
-                {!notification.isRead && (
+        <>
+          <div className="bg-white rounded-lg shadow divide-y divide-gray-200">
+            {displayedNotifications.map((notification) => (
+              <div
+                key={notification.id}
+                onClick={() => handleNotificationClick(notification)}
+                className={`p-4 hover:bg-gray-50 cursor-pointer transition ${
+                  !notification.isRead ? 'bg-blue-50' : ''
+                }`}
+              >
+                <div className="flex items-start space-x-3">
                   <div className="flex-shrink-0">
-                    <div className="h-2 w-2 bg-orange-600 rounded-full"></div>
+                    <div className="h-10 w-10 rounded-full bg-orange-100 flex items-center justify-center text-xl">
+                      {getNotificationIcon(notification.type)}
+                    </div>
                   </div>
-                )}
+                  <div className="flex-1 min-w-0">
+                    <p className="text-gray-900 font-medium">{notification.title}</p>
+                    {notification.message && (
+                      <p className="text-sm text-gray-700 mt-1">{notification.message}</p>
+                    )}
+                    <p className="text-xs text-gray-600 mt-1">
+                      {formatDistanceToNow(new Date(notification.createdAt), { addSuffix: true })}
+                    </p>
+                  </div>
+                  {!notification.isRead && (
+                    <div className="flex-shrink-0">
+                      <div className="h-2 w-2 bg-orange-600 rounded-full"></div>
+                    </div>
+                  )}
+                </div>
               </div>
+            ))}
+          </div>
+
+          {/* Show More Button */}
+          {!showAll && hasMore && (
+            <div className="mt-4 text-center">
+              <button
+                onClick={handleShowMore}
+                className="px-6 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 font-medium"
+              >
+                Show More ({notifications.length - 5} older)
+              </button>
             </div>
-          ))}
-        </div>
+          )}
+
+          {/* Show Less Button */}
+          {showAll && hasMore && (
+            <div className="mt-4 text-center">
+              <button
+                onClick={() => setShowAll(false)}
+                className="px-6 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 font-medium"
+              >
+                Show Less
+              </button>
+            </div>
+          )}
+        </>
       )}
     </div>
   );
