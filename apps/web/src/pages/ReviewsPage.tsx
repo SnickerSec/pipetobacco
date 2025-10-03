@@ -105,10 +105,10 @@ export default function ReviewsPage() {
 
       {/* Category Filter */}
       <div className="mb-6">
-        <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
+        <div className="flex gap-1.5 sm:gap-2 overflow-x-auto pb-2 scrollbar-hide">
           <button
             onClick={() => setCategoryFilter('')}
-            className={`px-3 sm:px-4 py-2 rounded-lg font-medium text-sm whitespace-nowrap flex-shrink-0 ${
+            className={`px-2 sm:px-4 py-1.5 sm:py-2 rounded-lg font-medium text-xs sm:text-sm whitespace-nowrap flex-shrink-0 ${
               categoryFilter === ''
                 ? 'bg-orange-600 text-white'
                 : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
@@ -118,7 +118,7 @@ export default function ReviewsPage() {
           </button>
           <button
             onClick={() => setCategoryFilter('PIPE_TOBACCO')}
-            className={`px-3 sm:px-4 py-2 rounded-lg font-medium text-sm whitespace-nowrap flex-shrink-0 ${
+            className={`px-2 sm:px-4 py-1.5 sm:py-2 rounded-lg font-medium text-xs sm:text-sm whitespace-nowrap flex-shrink-0 ${
               categoryFilter === 'PIPE_TOBACCO'
                 ? 'bg-orange-600 text-white'
                 : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
@@ -128,7 +128,7 @@ export default function ReviewsPage() {
           </button>
           <button
             onClick={() => setCategoryFilter('CIGAR')}
-            className={`px-3 sm:px-4 py-2 rounded-lg font-medium text-sm whitespace-nowrap flex-shrink-0 ${
+            className={`px-2 sm:px-4 py-1.5 sm:py-2 rounded-lg font-medium text-xs sm:text-sm whitespace-nowrap flex-shrink-0 ${
               categoryFilter === 'CIGAR'
                 ? 'bg-orange-600 text-white'
                 : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
@@ -138,7 +138,7 @@ export default function ReviewsPage() {
           </button>
           <button
             onClick={() => setCategoryFilter('PIPE')}
-            className={`px-3 sm:px-4 py-2 rounded-lg font-medium text-sm whitespace-nowrap flex-shrink-0 ${
+            className={`px-2 sm:px-4 py-1.5 sm:py-2 rounded-lg font-medium text-xs sm:text-sm whitespace-nowrap flex-shrink-0 ${
               categoryFilter === 'PIPE'
                 ? 'bg-orange-600 text-white'
                 : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
@@ -148,7 +148,7 @@ export default function ReviewsPage() {
           </button>
           <button
             onClick={() => setCategoryFilter('ACCESSORY')}
-            className={`px-3 sm:px-4 py-2 rounded-lg font-medium text-sm whitespace-nowrap flex-shrink-0 ${
+            className={`px-2 sm:px-4 py-1.5 sm:py-2 rounded-lg font-medium text-xs sm:text-sm whitespace-nowrap flex-shrink-0 ${
               categoryFilter === 'ACCESSORY'
                 ? 'bg-orange-600 text-white'
                 : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
