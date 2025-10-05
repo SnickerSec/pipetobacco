@@ -213,7 +213,7 @@ export default function MessagesPage() {
   }, [searchQuery, currentUser]);
 
   return (
-    <div className="flex h-[calc(100vh-4rem-6rem)] md:h-[calc(100vh-64px-2rem)] -mx-4 sm:-mx-6 lg:-mx-8 -mt-4 md:-mt-8 -mb-24 md:-mb-8">
+    <div className="flex h-[calc(100vh-1rem)] md:h-[calc(100vh-64px-2rem)] -mx-4 sm:-mx-6 lg:-mx-8 -mt-4 md:-mt-8 fixed md:relative left-0 md:left-auto right-0 md:right-auto top-4 md:top-auto bottom-[4.5rem] md:bottom-auto">
       {/* Conversations List - Hidden on mobile when viewing a conversation */}
       <div className={`w-full md:w-80 border-r border-gray-200 bg-white overflow-y-auto ${
         username ? 'hidden md:block' : 'block'
