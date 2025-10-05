@@ -731,6 +731,63 @@ class ApiService {
     }
   }
 
+  // Group Conversations
+  async convertToGroupChat(conversationId: string, groupName: string, userIdsToAdd: string[]): Promise<any> {
+    const response = await fetch(`${API_BASE_URL}/api/messages/conversations/${conversationId}/convert-to-group`, {
+      method: 'POST',
+      headers: this.getAuthHeaders(),
+      body: JSON.stringify({ groupName, userIdsToAdd }),
+    });
+
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({ error: 'Failed to convert to group chat' }));
+      throw new Error(error.error || 'Failed to convert to group chat');
+    }
+
+    return response.json();
+  }
+
+  async addGroupParticipants(conversationId: string, userIds: string[]): Promise<any> {
+    const response = await fetch(`${API_BASE_URL}/api/messages/conversations/${conversationId}/add-participants`, {
+      method: 'POST',
+      headers: this.getAuthHeaders(),
+      body: JSON.stringify({ userIds }),
+    });
+
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({ error: 'Failed to add participants' }));
+      throw new Error(error.error || 'Failed to add participants');
+    }
+
+    return response.json();
+  }
+
+  async getGroupConversation(conversationId: string): Promise<any> {
+    const response = await fetch(`${API_BASE_URL}/api/messages/conversations/group/${conversationId}`, {
+      headers: this.getAuthHeaders(),
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to fetch group conversation');
+    }
+
+    return response.json();
+  }
+
+  async sendGroupMessage(conversationId: string, content: string): Promise<any> {
+    const response = await fetch(`${API_BASE_URL}/api/messages/conversations/group/${conversationId}/messages`, {
+      method: 'POST',
+      headers: this.getAuthHeaders(),
+      body: JSON.stringify({ content }),
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to send group message');
+    }
+
+    return response.json();
+  }
+
   // Events
   async getClubEvents(slug: string): Promise<any[]> {
     const response = await fetch(`${API_BASE_URL}/api/clubs/${slug}/events`, {

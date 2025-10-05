@@ -62,6 +62,11 @@ export default function MessagesPage() {
   const [mentionStartPos, setMentionStartPos] = useState(0);
   const [selectedSuggestionIndex, setSelectedSuggestionIndex] = useState(0);
   const messageInputRef = useRef<HTMLInputElement>(null);
+  const [showAddToGroupModal, setShowAddToGroupModal] = useState(false);
+  const [groupName, setGroupName] = useState('');
+  const [selectedUsersForGroup, setSelectedUsersForGroup] = useState<string[]>([]);
+  const [userSearchResults, setUserSearchResults] = useState<any[]>([]);
+  const [userSearchQuery, setUserSearchQuery] = useState('');
 
   // Load current user
   useEffect(() => {
@@ -293,6 +298,67 @@ export default function MessagesPage() {
     }
   };
 
+  // Search users for adding to group
+  useEffect(() => {
+    const searchUsersForGroup = async () => {
+      if (userSearchQuery.trim().length < 2) {
+        setUserSearchResults([]);
+        return;
+      }
+
+      try {
+        const results = await api.searchUsers(userSearchQuery);
+        const filteredResults = currentUser
+          ? results.filter((user) => user.id !== currentUser.id)
+          : results;
+        setUserSearchResults(filteredResults);
+      } catch (error) {
+        console.error('Error searching users:', error);
+        setUserSearchResults([]);
+      }
+    };
+
+    const timeoutId = setTimeout(searchUsersForGroup, 300);
+    return () => clearTimeout(timeoutId);
+  }, [userSearchQuery, currentUser]);
+
+  const handleConvertToGroup = async () => {
+    if (!currentConversation || !groupName.trim() || selectedUsersForGroup.length === 0) {
+      return;
+    }
+
+    try {
+      const result = await api.convertToGroupChat(
+        currentConversation.id,
+        groupName.trim(),
+        selectedUsersForGroup
+      );
+
+      // Reload conversation
+      setCurrentConversation({
+        ...currentConversation,
+        type: 'GROUP',
+        groupName: result.groupName,
+        participants: result.participants,
+      });
+
+      setShowAddToGroupModal(false);
+      setGroupName('');
+      setSelectedUsersForGroup([]);
+      setUserSearchQuery('');
+      setUserSearchResults([]);
+    } catch (error) {
+      console.error('Error converting to group:', error);
+      alert('Failed to convert to group chat');
+    }
+  };
+
+  const toggleUserSelection = (userId: string) => {
+    setSelectedUsersForGroup((prev) =>
+      prev.includes(userId) ? prev.filter((id) => id !== userId) : [...prev, userId]
+    );
+  };
+
   return (
     <div className="flex h-[calc(100vh-1rem-6rem)] md:h-[calc(100vh-64px-2rem)] -mx-4 sm:-mx-6 lg:-mx-8 -mt-4 md:-mt-8">
       {/* Conversations List - Hidden on mobile when viewing a conversation */}
@@ -480,36 +546,60 @@ export default function MessagesPage() {
           <>
             {/* Chat Header */}
             <div className="bg-white border-b border-gray-200 p-4">
-              <div className="flex items-center space-x-3">
-                {/* Back button - only on mobile */}
-                <button
-                  onClick={() => navigate('/messages')}
-                  className="md:hidden p-2 -ml-2 text-gray-600 hover:text-gray-900"
-                >
-                  <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                  </svg>
-                </button>
-                {currentConversation.otherParticipant && (
-                  <>
-                    <img
-                      src={
-                        currentConversation.otherParticipant.avatarUrl ||
-                        `https://ui-avatars.com/api/?name=${currentConversation.otherParticipant.displayName || currentConversation.otherParticipant.username}`
-                      }
-                      alt={currentConversation.otherParticipant.username}
-                      className="h-10 w-10 rounded-full"
-                    />
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-3">
+                  {/* Back button - only on mobile */}
+                  <button
+                    onClick={() => navigate('/messages')}
+                    className="md:hidden p-2 -ml-2 text-gray-600 hover:text-gray-900"
+                  >
+                    <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                    </svg>
+                  </button>
+                  {currentConversation.otherParticipant && (
+                    <>
+                      <img
+                        src={
+                          currentConversation.otherParticipant.avatarUrl ||
+                          `https://ui-avatars.com/api/?name=${currentConversation.otherParticipant.displayName || currentConversation.otherParticipant.username}`
+                        }
+                        alt={currentConversation.otherParticipant.username}
+                        className="h-10 w-10 rounded-full"
+                      />
+                      <div>
+                        <h3 className="text-sm font-medium text-gray-900">
+                          {currentConversation.otherParticipant.displayName ||
+                            currentConversation.otherParticipant.username}
+                        </h3>
+                        <p className="text-xs text-gray-500">
+                          @{currentConversation.otherParticipant.username}
+                        </p>
+                      </div>
+                    </>
+                  )}
+                  {currentConversation.type === 'GROUP' && (
                     <div>
                       <h3 className="text-sm font-medium text-gray-900">
-                        {currentConversation.otherParticipant.displayName ||
-                          currentConversation.otherParticipant.username}
+                        {currentConversation.groupName}
                       </h3>
                       <p className="text-xs text-gray-500">
-                        @{currentConversation.otherParticipant.username}
+                        {currentConversation.participants?.length || 0} participants
                       </p>
                     </div>
-                  </>
+                  )}
+                </div>
+                {/* Add to Group button - only for DIRECT conversations */}
+                {currentConversation.type === 'DIRECT' && (
+                  <button
+                    onClick={() => setShowAddToGroupModal(true)}
+                    className="px-3 py-1.5 text-sm bg-orange-500 text-white rounded-lg hover:bg-orange-600 flex items-center space-x-1"
+                  >
+                    <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                    </svg>
+                    <span>Add to Group</span>
+                  </button>
                 )}
               </div>
             </div>
@@ -799,6 +889,142 @@ export default function MessagesPage() {
                   Cancel
                 </button>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Add to Group Modal */}
+      {showAddToGroupModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-lg max-w-md w-full p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-bold text-gray-900">Create Group Chat</h3>
+              <button
+                onClick={() => {
+                  setShowAddToGroupModal(false);
+                  setGroupName('');
+                  setSelectedUsersForGroup([]);
+                  setUserSearchQuery('');
+                }}
+                className="text-gray-500 hover:text-gray-700"
+              >
+                <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Group Name
+                </label>
+                <input
+                  type="text"
+                  value={groupName}
+                  onChange={(e) => setGroupName(e.target.value)}
+                  placeholder="Enter group name..."
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Add People
+                </label>
+                <input
+                  type="text"
+                  value={userSearchQuery}
+                  onChange={(e) => setUserSearchQuery(e.target.value)}
+                  placeholder="Search users..."
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                />
+              </div>
+
+              {/* Selected Users */}
+              {selectedUsersForGroup.length > 0 && (
+                <div className="flex flex-wrap gap-2">
+                  {userSearchResults
+                    .filter((user) => selectedUsersForGroup.includes(user.id))
+                    .map((user) => (
+                      <div
+                        key={user.id}
+                        className="flex items-center space-x-2 bg-orange-100 text-orange-800 px-3 py-1 rounded-full text-sm"
+                      >
+                        <span>{user.displayName || user.username}</span>
+                        <button
+                          onClick={() => toggleUserSelection(user.id)}
+                          className="hover:text-orange-900"
+                        >
+                          <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                          </svg>
+                        </button>
+                      </div>
+                    ))}
+                </div>
+              )}
+
+              {/* User Search Results */}
+              <div className="max-h-48 overflow-y-auto border border-gray-200 rounded-lg">
+                {userSearchResults.length > 0 ? (
+                  userSearchResults.map((user) => (
+                    <button
+                      key={user.id}
+                      onClick={() => toggleUserSelection(user.id)}
+                      className={`w-full flex items-center space-x-3 p-3 hover:bg-gray-50 transition-colors ${
+                        selectedUsersForGroup.includes(user.id) ? 'bg-orange-50' : ''
+                      }`}
+                    >
+                      <img
+                        src={
+                          user.avatarUrl ||
+                          `https://ui-avatars.com/api/?name=${user.displayName || user.username}`
+                        }
+                        alt={user.username}
+                        className="h-10 w-10 rounded-full"
+                      />
+                      <div className="flex-1 text-left">
+                        <p className="text-sm font-medium text-gray-900">
+                          {user.displayName || user.username}
+                        </p>
+                        <p className="text-xs text-gray-500">@{user.username}</p>
+                      </div>
+                      {selectedUsersForGroup.includes(user.id) && (
+                        <svg className="h-5 w-5 text-orange-500" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                        </svg>
+                      )}
+                    </button>
+                  ))
+                ) : userSearchQuery.trim().length >= 2 ? (
+                  <p className="text-center text-gray-500 py-4 text-sm">No users found</p>
+                ) : (
+                  <p className="text-center text-gray-500 py-4 text-sm">Search for users to add</p>
+                )}
+              </div>
+            </div>
+
+            <div className="mt-6 flex justify-end space-x-3">
+              <button
+                onClick={() => {
+                  setShowAddToGroupModal(false);
+                  setGroupName('');
+                  setSelectedUsersForGroup([]);
+                  setUserSearchQuery('');
+                }}
+                className="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleConvertToGroup}
+                disabled={!groupName.trim() || selectedUsersForGroup.length === 0}
+                className="px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              >
+                Create Group
+              </button>
             </div>
           </div>
         </div>
