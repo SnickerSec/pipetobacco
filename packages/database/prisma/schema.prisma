@@ -63,6 +63,7 @@ model User {
   blockedBy               Block[]                   @relation("Blocked")
   sentMessages            Message[]                 @relation("MessageSender")
   receivedMessages        Message[]                 @relation("MessageReceiver")
+  conversationParticipants ConversationParticipant[] @relation("ConversationParticipants")
   notifications           Notification[]
   reviews                 Review[]
   eventRSVPs              EventRSVP[]
@@ -423,6 +424,7 @@ model ConversationParticipant {
   joinedAt       DateTime     @default(now())
 
   conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  user           User         @relation("ConversationParticipants", fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([conversationId, userId])
   @@index([conversationId])
