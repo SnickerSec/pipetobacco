@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <defs>
+    <linearGradient id="pipeGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#ea580c;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#c2410c;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+
+  <!-- Pipe bowl -->
+  <ellipse cx="25" cy="50" rx="18" ry="22" fill="url(#pipeGrad)" stroke="#92400e" stroke-width="2"/>
+
+  <!-- Pipe stem -->
+  <rect x="40" y="48" width="55" height="4" rx="2" fill="#92400e"/>
+
+  <!-- Bowl highlight -->
+  <ellipse cx="20" cy="45" rx="6" ry="8" fill="#f97316" opacity="0.6"/>
+
+  <!-- Smoke -->
+  <path d="M 20 28 Q 18 20 22 15 Q 20 10 24 8" stroke="#9ca3af" stroke-width="2" fill="none" opacity="0.7" stroke-linecap="round"/>
+  <path d="M 28 25 Q 30 18 26 12 Q 28 8 24 5" stroke="#9ca3af" stroke-width="2" fill="none" opacity="0.5" stroke-linecap="round"/>
+</svg>

@@ -1,6 +1,47 @@
 export default function LandingPage() {
+  // Structured data for SEO
+  const structuredData = {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "name": "Herf Social",
+    "alternateName": "Herf Social - Cigar & Pipe Tobacco Community",
+    "url": "https://herf.social",
+    "description": "Join the premier online community for cigar and pipe tobacco enthusiasts. Share reviews, connect with local clubs, discover new blends, and organize herf events.",
+    "potentialAction": {
+      "@type": "SearchAction",
+      "target": {
+        "@type": "EntryPoint",
+        "urlTemplate": "https://herf.social/search?q={search_term_string}"
+      },
+      "query-input": "required name=search_term_string"
+    },
+    "sameAs": [
+      "https://herf.social"
+    ]
+  };
+
+  const organizationData = {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    "name": "Herf Social",
+    "url": "https://herf.social",
+    "logo": "https://herf.social/android-chrome-512x512.png",
+    "description": "A dedicated community for cigar and pipe tobacco enthusiasts",
+    "foundingDate": "2025",
+    "sameAs": [
+      "https://herf.social"
+    ]
+  };
+
   return (
     <div>
+      {/* Structured Data */}
+      <script type="application/ld+json">
+        {JSON.stringify(structuredData)}
+      </script>
+      <script type="application/ld+json">
+        {JSON.stringify(organizationData)}
+      </script>
       {/* Hero Section */}
       <section className="bg-gradient-to-br from-ember-50 to-tobacco-100 py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">

@@ -1,0 +1,14 @@
+# robots.txt for Herf Social
+
+User-agent: *
+Allow: /
+Disallow: /api/
+Disallow: /messages/
+Disallow: /notifications/
+Disallow: /settings/
+
+# Sitemap
+Sitemap: https://herf.social/sitemap.xml
+
+# Crawl delay (be nice to servers)
+Crawl-delay: 1
