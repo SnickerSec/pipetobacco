@@ -279,7 +279,8 @@ class ApiService {
     });
 
     if (!response.ok) {
-      throw new Error('Failed to follow user');
+      const error = await response.json().catch(() => ({ error: 'Failed to follow user' }));
+      throw new Error(error.error || 'Failed to follow user');
     }
   }
 
@@ -290,7 +291,8 @@ class ApiService {
     });
 
     if (!response.ok) {
-      throw new Error('Failed to unfollow user');
+      const error = await response.json().catch(() => ({ error: 'Failed to unfollow user' }));
+      throw new Error(error.error || 'Failed to unfollow user');
     }
   }
 
