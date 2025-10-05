@@ -395,8 +395,9 @@ model Conversation {
   participant1Id String?
   participant2Id String?
 
-  // For GROUP conversations (club messaging)
-  clubId         String?
+  // For GROUP conversations
+  groupName      String?          // Name for group chats
+  clubId         String?          // For club messaging
 
   lastMessageAt  DateTime  @default(now())
   createdAt      DateTime  @default(now())
