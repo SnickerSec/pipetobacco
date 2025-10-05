@@ -141,6 +141,7 @@ router.patch('/me', authenticate, async (req: AuthRequest, res) => {
 router.get('/:username', authenticate, async (req: AuthRequest, res) => {
   try {
     const { username } = req.params;
+    const currentUserId = req.user!.userId;
 
     const user = await prisma.user.findUnique({
       where: { username },
@@ -169,7 +170,20 @@ router.get('/:username', authenticate, async (req: AuthRequest, res) => {
       return res.status(404).json({ error: 'User not found' });
     }
 
-    res.json(user);
+    // Check if current user is following this profile
+    const followRelation = await prisma.follow.findUnique({
+      where: {
+        followerId_followingId: {
+          followerId: currentUserId,
+          followingId: user.id,
+        },
+      },
+    });
+
+    res.json({
+      ...user,
+      isFollowing: !!followRelation,
+    });
   } catch (error) {
     console.error('Error fetching user profile:', error);
     res.status(500).json({ error: 'Failed to fetch profile' });

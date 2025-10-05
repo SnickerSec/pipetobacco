@@ -13,6 +13,7 @@ interface User {
   isVerified: boolean;
   defaultClubId?: string | null;
   createdAt: string;
+  isFollowing?: boolean;
   _count?: {
     posts: number;
     followers: number;

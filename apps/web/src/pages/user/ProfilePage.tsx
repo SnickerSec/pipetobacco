@@ -45,11 +45,8 @@ export default function ProfilePage() {
       setCurrentUser(currentUserData);
       setPosts(userPosts);
 
-      // Check if current user is following this profile
-      if (currentUserData) {
-        // TODO: Add API call to check follow status
-        setIsFollowing(false);
-      }
+      // Set following status from API response
+      setIsFollowing(profileData.isFollowing || false);
     } catch (err: any) {
       setError(err.message || 'Failed to load profile');
       console.error(err);
