@@ -193,6 +193,50 @@ export default function EventDetailPage() {
     };
   };
 
+  const generateICS = () => {
+    if (!event) return;
+
+    // Convert dates to ICS format (YYYYMMDDTHHMMSSZ)
+    const formatICSDate = (dateString: string) => {
+      const date = new Date(dateString);
+      return date.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
+    };
+
+    const startDateTime = formatICSDate(event.startTime);
+    const endDateTime = event.endTime ? formatICSDate(event.endTime) : formatICSDate(new Date(new Date(event.startTime).getTime() + 2 * 60 * 60 * 1000).toISOString()); // Default 2 hours if no end time
+
+    const description = event.description ? event.description.replace(/\n/g, '\\n') : '';
+    const location = event.location || '';
+    const eventUrl = `${window.location.origin}/events/${event.id}`;
+
+    const icsContent = [
+      'BEGIN:VCALENDAR',
+      'VERSION:2.0',
+      'PRODID:-//Herf Social//Event//EN',
+      'BEGIN:VEVENT',
+      `UID:${event.id}@herfsocial.com`,
+      `DTSTAMP:${formatICSDate(new Date().toISOString())}`,
+      `DTSTART:${startDateTime}`,
+      `DTEND:${endDateTime}`,
+      `SUMMARY:${event.title}`,
+      `DESCRIPTION:${description}\\n\\nView event: ${eventUrl}`,
+      `LOCATION:${location}`,
+      `URL:${eventUrl}`,
+      'STATUS:CONFIRMED',
+      'END:VEVENT',
+      'END:VCALENDAR',
+    ].join('\r\n');
+
+    // Create blob and download
+    const blob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = `${event.title.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.ics`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   if (loading) {
     return (
       <div className="max-w-4xl mx-auto">
@@ -348,7 +392,7 @@ export default function EventDetailPage() {
           {!isPast && (
             <div className="mb-6">
               <h2 className="text-lg font-semibold text-gray-900 mb-3">Will you attend?</h2>
-              <div className="flex gap-3">
+              <div className="flex flex-wrap gap-3">
                 <button
                   onClick={() => handleRsvp('GOING')}
                   disabled={isRsvping}
@@ -383,6 +427,21 @@ export default function EventDetailPage() {
                   Can't Go
                 </button>
               </div>
+            </div>
+          )}
+
+          {/* Add to Calendar */}
+          {!isPast && (
+            <div className="mb-6">
+              <button
+                onClick={generateICS}
+                className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-medium"
+              >
+                <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+                Add to Calendar
+              </button>
             </div>
           )}
 
