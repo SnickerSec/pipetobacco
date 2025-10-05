@@ -286,6 +286,14 @@ export default function AuthenticatedLayout() {
                 {showUserMenu && (
                   <div className="absolute right-0 mt-2 w-48 bg-white border border-tobacco-200 rounded-lg shadow-lg py-1 z-50">
                     <Link
+                      to="/notifications"
+                      onClick={() => setShowUserMenu(false)}
+                      className="flex items-center space-x-2 px-4 py-2 text-tobacco-700 hover:bg-tobacco-50 transition"
+                    >
+                      <BellIcon className="h-5 w-5" />
+                      <span>Notifications</span>
+                    </Link>
+                    <Link
                       to="/profile/me"
                       onClick={() => setShowUserMenu(false)}
                       className="flex items-center space-x-2 px-4 py-2 text-tobacco-700 hover:bg-tobacco-50 transition"
