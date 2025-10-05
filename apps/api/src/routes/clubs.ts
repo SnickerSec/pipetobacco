@@ -127,10 +127,12 @@ router.get('/:slug', authenticate, async (req: AuthRequest, res) => {
       return res.status(404).json({ error: 'Club not found' });
     }
 
-    // Check if user is a member
+    // Check if user can access the club
     const isMember = club.members.some(m => m.userId === userId);
-    if (!isMember) {
-      return res.status(403).json({ error: 'You must be a member of this club to view it' });
+
+    // Private clubs require membership
+    if (club.isPrivate && !isMember) {
+      return res.status(403).json({ error: 'This club is private. You must be a member to view it.' });
     }
 
     // Add user membership info if authenticated
@@ -490,10 +492,12 @@ router.get('/:slug/posts', authenticate, async (req: AuthRequest, res) => {
       return res.status(404).json({ error: 'Club not found' });
     }
 
-    // Check if user is a member
+    // Check if user can access the club posts
     const isMember = club.members && club.members.length > 0;
-    if (!isMember) {
-      return res.status(403).json({ error: 'You must be a member of this club to view posts' });
+
+    // Private clubs require membership to view posts
+    if (club.isPrivate && !isMember) {
+      return res.status(403).json({ error: 'This club is private. You must be a member to view posts.' });
     }
 
     const posts = await prisma.post.findMany({
