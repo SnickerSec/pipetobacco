@@ -337,10 +337,15 @@ export default function EventsPage() {
                     {/* Location and Attendees - Mobile only */}
                     <div className="flex-1 md:hidden flex flex-col justify-center gap-2 text-sm text-gray-600">
                       {event.location && (
-                        <span className="flex items-start gap-1">
+                        <a
+                          href={`https://maps.google.com/?q=${encodeURIComponent(event.location)}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-start gap-1 hover:text-orange-600 transition"
+                        >
                           <span className="flex-shrink-0">📍</span>
-                          <span className="break-words">{event.location}</span>
-                        </span>
+                          <span className="break-words underline">{event.location}</span>
+                        </a>
                       )}
                       {event._count.rsvps > 0 ? (
                         <button
@@ -386,10 +391,15 @@ export default function EventsPage() {
                       {/* Location and Attendees - Desktop only */}
                       <div className="hidden md:flex md:flex-row md:items-center gap-2 sm:gap-4 text-sm text-gray-600">
                         {event.location && (
-                          <span className="flex items-start gap-1">
+                          <a
+                            href={`https://maps.google.com/?q=${encodeURIComponent(event.location)}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex items-start gap-1 hover:text-orange-600 transition"
+                          >
                             <span className="flex-shrink-0">📍</span>
-                            <span className="break-words">{event.location}</span>
-                          </span>
+                            <span className="break-words underline">{event.location}</span>
+                          </a>
                         )}
                         {event._count.rsvps > 0 ? (
                           <button
