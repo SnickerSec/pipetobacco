@@ -183,6 +183,11 @@ router.get('/:username', authenticate, async (req: AuthRequest, res) => {
     const isFollowing = !!followRelation;
     console.log(`User ${currentUserId} viewing ${user.username} (${user.id}): isFollowing = ${isFollowing}`);
 
+    // Prevent caching to ensure fresh follow status
+    res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+    res.setHeader('Pragma', 'no-cache');
+    res.setHeader('Expires', '0');
+
     res.json({
       ...user,
       isFollowing,
