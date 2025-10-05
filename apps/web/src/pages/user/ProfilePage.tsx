@@ -77,12 +77,14 @@ export default function ProfilePage() {
         await fetchProfileData(true);
       }
     } catch (err: any) {
-      // Handle "already following" error by updating state
-      if (err.message?.includes('Already following')) {
-        console.log('Setting isFollowing to true due to "Already following" error');
-        setIsFollowing(true);
-        // Refresh to update follower count but preserve our corrected follow state
-        await fetchProfileData(true);
+      console.error('Follow/unfollow error:', err);
+
+      // Handle "already following" or "already not following" errors by syncing with server
+      const errorMsg = err.message?.toLowerCase() || '';
+      if (errorMsg.includes('already following') || errorMsg.includes('already')) {
+        console.log('Syncing follow state with server due to error:', err.message);
+        // Refresh from server without preserving state to get the true follow status
+        await fetchProfileData(false);
       } else {
         alert(err.message || 'Failed to update follow status');
       }
