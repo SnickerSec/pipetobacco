@@ -319,7 +319,7 @@ export default function EventsPage() {
                   isPast ? 'opacity-75' : ''
                 }`}
               >
-                <div className="flex flex-col md:flex-row md:items-center md:space-x-6">
+                <div className="flex flex-col md:flex-row md:items-start md:space-x-6">
                   {/* Date Badge and Location/Attendees for Mobile */}
                   <div className="flex gap-4 mb-4 md:mb-0">
                     {/* Date Badge */}
@@ -362,8 +362,8 @@ export default function EventsPage() {
 
                   {/* Event Info */}
                   <div className="flex-1">
-                    <div className="flex items-start justify-between">
-                      <div>
+                    <div className="flex items-start justify-between gap-4">
+                      <div className="flex-1">
                         <div className="flex items-center space-x-2 mb-1">
                           <h3 className="text-xl font-bold text-gray-900">{event.title}</h3>
                           {!event.isPublic && (
@@ -385,6 +385,43 @@ export default function EventsPage() {
                           <p className="text-gray-700">{event.description}</p>
                         )}
                       </div>
+
+                      {/* Action Buttons - Upper Right */}
+                      {!isPast && (
+                        <div className="hidden md:flex gap-2 flex-shrink-0">
+                          <Link
+                            to={`/events/${event.id}`}
+                            className="px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 text-sm font-medium whitespace-nowrap"
+                          >
+                            View Details
+                          </Link>
+                          <button
+                            onClick={() => {
+                              const url = `${window.location.origin}/events/${event.id}`;
+                              if (navigator.share) {
+                                navigator.share({
+                                  title: event.title,
+                                  text: `Join me at ${event.title} on ${date.weekday}, ${date.time}`,
+                                  url: url,
+                                }).catch(() => {
+                                  // Fallback to clipboard
+                                  navigator.clipboard.writeText(url);
+                                  alert('Event link copied to clipboard!');
+                                });
+                              } else {
+                                navigator.clipboard.writeText(url);
+                                alert('Event link copied to clipboard!');
+                              }
+                            }}
+                            className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 text-sm font-medium"
+                            title="Share event"
+                          >
+                            <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
+                            </svg>
+                          </button>
+                        </div>
+                      )}
                     </div>
 
                     <div className="mt-4 space-y-3">
@@ -413,12 +450,12 @@ export default function EventsPage() {
                         )}
                       </div>
 
-                      {/* Action Buttons - Full width on mobile */}
+                      {/* Action Buttons - Mobile (Full width) */}
                       {!isPast && (
-                        <div className="flex gap-2">
+                        <div className="flex md:hidden gap-2">
                           <Link
                             to={`/events/${event.id}`}
-                            className="flex-1 sm:flex-none text-center px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 text-sm font-medium"
+                            className="flex-1 text-center px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 text-sm font-medium"
                           >
                             View Details
                           </Link>
