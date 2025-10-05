@@ -272,9 +272,9 @@ export default function EventDetailPage() {
               </div>
             )}
           </div>
-          <div className="flex items-center gap-4 text-sm">
+          <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-4 text-sm">
             <div className="flex items-center gap-1">
-              <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="h-5 w-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path
                   strokeLinecap="round"
                   strokeLinejoin="round"
@@ -285,8 +285,13 @@ export default function EventDetailPage() {
               {startDate.full}
             </div>
             {event.location && (
-              <div className="flex items-center gap-1">
-                <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <a
+                href={`https://maps.google.com/?q=${encodeURIComponent(event.location)}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-1 hover:underline"
+              >
+                <svg className="h-5 w-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path
                     strokeLinecap="round"
                     strokeLinejoin="round"
@@ -301,7 +306,7 @@ export default function EventDetailPage() {
                   />
                 </svg>
                 {event.location}
-              </div>
+              </a>
             )}
           </div>
         </div>
