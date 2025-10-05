@@ -56,6 +56,12 @@ export default function MessagesPage() {
   const [userClubs, setUserClubs] = useState<any[]>([]);
   const [newMessageTab, setNewMessageTab] = useState<'users' | 'clubs'>('users');
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const [showMentionSuggestions, setShowMentionSuggestions] = useState(false);
+  const [mentionSuggestions, setMentionSuggestions] = useState<any[]>([]);
+  const [mentionQuery, setMentionQuery] = useState('');
+  const [mentionStartPos, setMentionStartPos] = useState(0);
+  const [selectedSuggestionIndex, setSelectedSuggestionIndex] = useState(0);
+  const messageInputRef = useRef<HTMLInputElement>(null);
 
   // Load current user
   useEffect(() => {
@@ -211,6 +217,81 @@ export default function MessagesPage() {
     const timeoutId = setTimeout(searchUsers, 300); // Debounce search
     return () => clearTimeout(timeoutId);
   }, [searchQuery, currentUser]);
+
+  // Handle @ mention detection and autocomplete
+  const handleMessageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    const cursorPos = e.target.selectionStart || 0;
+
+    setNewMessage(value);
+
+    // Find @ symbol before cursor
+    const textBeforeCursor = value.substring(0, cursorPos);
+    const lastAtIndex = textBeforeCursor.lastIndexOf('@');
+
+    if (lastAtIndex !== -1) {
+      const textAfterAt = textBeforeCursor.substring(lastAtIndex + 1);
+      // Check if there's a space after @ (if so, don't show suggestions)
+      if (!textAfterAt.includes(' ')) {
+        setMentionStartPos(lastAtIndex);
+        setMentionQuery(textAfterAt);
+
+        // Search for users
+        if (textAfterAt.length >= 0) {
+          try {
+            const results = textAfterAt.length === 0
+              ? []
+              : await api.searchUsers(textAfterAt);
+            const filteredResults = currentUser
+              ? results.filter((user) => user.id !== currentUser.id)
+              : results;
+            setMentionSuggestions(filteredResults);
+            setShowMentionSuggestions(true);
+            setSelectedSuggestionIndex(0);
+          } catch (error) {
+            console.error('Error searching users for mention:', error);
+          }
+        }
+      } else {
+        setShowMentionSuggestions(false);
+      }
+    } else {
+      setShowMentionSuggestions(false);
+    }
+  };
+
+  const handleMentionSelect = (user: any) => {
+    const beforeMention = newMessage.substring(0, mentionStartPos);
+    const afterMention = newMessage.substring(mentionStartPos + mentionQuery.length + 1);
+    const newValue = `${beforeMention}@${user.username} ${afterMention}`;
+
+    setNewMessage(newValue);
+    setShowMentionSuggestions(false);
+    setMentionSuggestions([]);
+    setMentionQuery('');
+
+    // Focus back on input
+    messageInputRef.current?.focus();
+  };
+
+  const handleMessageKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (showMentionSuggestions && mentionSuggestions.length > 0) {
+      if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        setSelectedSuggestionIndex((prev) =>
+          prev < mentionSuggestions.length - 1 ? prev + 1 : prev
+        );
+      } else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        setSelectedSuggestionIndex((prev) => (prev > 0 ? prev - 1 : 0));
+      } else if (e.key === 'Enter') {
+        e.preventDefault();
+        handleMentionSelect(mentionSuggestions[selectedSuggestionIndex]);
+      } else if (e.key === 'Escape') {
+        setShowMentionSuggestions(false);
+      }
+    }
+  };
 
   return (
     <div className="flex h-[calc(100vh-1rem-6rem)] md:h-[calc(100vh-64px-2rem)] -mx-4 sm:-mx-6 lg:-mx-8 -mt-4 md:-mt-8">
@@ -488,13 +569,46 @@ export default function MessagesPage() {
             </div>
 
             {/* Message Input - fixed at bottom, above navigation bar on mobile */}
-            <div className="bg-white border-t border-gray-200 p-3 md:p-4 flex-shrink-0">
+            <div className="bg-white border-t border-gray-200 p-3 md:p-4 flex-shrink-0 relative">
+              {/* Mention Suggestions Dropdown */}
+              {showMentionSuggestions && mentionSuggestions.length > 0 && (
+                <div className="absolute bottom-full left-3 right-3 mb-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-48 overflow-y-auto z-50">
+                  {mentionSuggestions.map((user, index) => (
+                    <button
+                      key={user.id}
+                      type="button"
+                      onClick={() => handleMentionSelect(user)}
+                      className={`w-full px-4 py-2 flex items-center space-x-3 hover:bg-gray-50 ${
+                        index === selectedSuggestionIndex ? 'bg-gray-100' : ''
+                      }`}
+                    >
+                      <img
+                        src={
+                          user.avatarUrl ||
+                          `https://ui-avatars.com/api/?name=${user.displayName || user.username}`
+                        }
+                        alt={user.username}
+                        className="h-8 w-8 rounded-full"
+                      />
+                      <div className="text-left">
+                        <p className="text-sm font-medium text-gray-900">
+                          {user.displayName || user.username}
+                        </p>
+                        <p className="text-xs text-gray-500">@{user.username}</p>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              )}
+
               <form onSubmit={handleSendMessage} className="flex space-x-2">
                 <input
+                  ref={messageInputRef}
                   type="text"
                   value={newMessage}
-                  onChange={(e) => setNewMessage(e.target.value)}
-                  placeholder="Type a message..."
+                  onChange={handleMessageChange}
+                  onKeyDown={handleMessageKeyDown}
+                  placeholder="Type a message... (Use @ to mention)"
                   className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
                   disabled={isSending}
                 />
