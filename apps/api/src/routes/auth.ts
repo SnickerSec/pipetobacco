@@ -53,4 +53,27 @@ router.get(
   }
 );
 
+// Instagram OAuth Routes
+router.get(
+  '/instagram',
+  passport.authenticate('instagram', {
+    session: false,
+  })
+);
+
+router.get(
+  '/instagram/callback',
+  passport.authenticate('instagram', {
+    session: false,
+    failureRedirect: `${process.env.FRONTEND_URL || 'http://localhost:5173'}/login?error=instagram_auth_failed`,
+  }),
+  (req, res) => {
+    const user = req.user as User;
+    const token = generateToken(user);
+
+    // Redirect to frontend with token
+    res.redirect(`${process.env.FRONTEND_URL || 'http://localhost:5173'}/auth/callback?token=${token}`);
+  }
+);
+
 export default router;
