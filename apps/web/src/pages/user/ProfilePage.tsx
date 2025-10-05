@@ -41,15 +41,22 @@ export default function ProfilePage() {
         api.getUserPosts(targetUsername),
       ]);
 
+      console.log('=== PROFILE DATA DEBUG ===');
+      console.log('Raw profileData:', profileData);
+      console.log('profileData.isFollowing type:', typeof profileData.isFollowing);
+      console.log('profileData.isFollowing value:', profileData.isFollowing);
+      console.log('preserveFollowState:', preserveFollowState);
+      console.log('========================');
+
       setUser(profileData);
       setCurrentUser(currentUserData);
       setPosts(userPosts);
 
       // Set following status from API response (unless we're preserving the current state)
       if (!preserveFollowState) {
-        console.log('Profile data isFollowing:', profileData.isFollowing);
-        console.log('Setting isFollowing to:', profileData.isFollowing ?? false);
-        setIsFollowing(profileData.isFollowing ?? false);
+        const followStatus = profileData.isFollowing ?? false;
+        console.log('Setting isFollowing to:', followStatus);
+        setIsFollowing(followStatus);
       } else {
         console.log('Preserving follow state, not updating from API');
       }
@@ -64,20 +71,30 @@ export default function ProfilePage() {
   const handleFollow = async () => {
     if (!user) return;
 
+    console.log('=== FOLLOW BUTTON CLICKED ===');
+    console.log('Current isFollowing state:', isFollowing);
+    console.log('User:', user.username);
+    console.log('============================');
+
     try {
       if (isFollowing) {
+        console.log('Attempting to UNFOLLOW...');
         await api.unfollowUser(user.username);
         setIsFollowing(false);
         // Refresh profile to update follower count (preserve follow state)
         await fetchProfileData(true);
       } else {
+        console.log('Attempting to FOLLOW...');
         await api.followUser(user.username);
         setIsFollowing(true);
         // Refresh profile to update follower count (preserve follow state)
         await fetchProfileData(true);
       }
     } catch (err: any) {
-      console.error('Follow/unfollow error:', err);
+      console.error('=== FOLLOW ERROR ===');
+      console.error('Error:', err);
+      console.error('Error message:', err.message);
+      console.error('==================');
 
       // Handle "already following" or "already not following" errors by syncing with server
       const errorMsg = err.message?.toLowerCase() || '';

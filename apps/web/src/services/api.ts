@@ -243,7 +243,13 @@ class ApiService {
     const response = await fetch(`${API_BASE_URL}/api/users/${username}`, {
       headers: this.getAuthHeaders(),
     });
-    return this.handleResponse(response);
+    const data = await this.handleResponse(response);
+    console.log('=== API getUserProfile Response ===');
+    console.log('Username:', username);
+    console.log('Response data:', data);
+    console.log('isFollowing in response:', data.isFollowing);
+    console.log('==================================');
+    return data;
   }
 
   async updateProfile(data: UpdateProfileData): Promise<User> {
