@@ -138,9 +138,9 @@ export default function FeedPage() {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         {/* Main Content - Posts (Center Column) */}
         <div className="lg:col-span-8 space-y-6">
-          {/* Club Selector */}
+          {/* Club Selector - Desktop Only */}
           {clubs.length > 0 && (
-            <div className="bg-white rounded-lg shadow p-4">
+            <div className="hidden lg:block bg-white rounded-lg shadow p-4">
               <label htmlFor="club-select" className="block text-sm font-medium text-gray-700 mb-2">
                 Posting to:
               </label>
@@ -159,8 +159,34 @@ export default function FeedPage() {
             </div>
           )}
 
-          {/* Create Post */}
-          <CreatePostForm onPostCreated={handlePostCreated} clubId={selectedClubId} />
+          {/* Create Post - Desktop Only */}
+          <div className="hidden lg:block">
+            <CreatePostForm onPostCreated={handlePostCreated} clubId={selectedClubId} />
+          </div>
+
+          {/* Combined Club Selector & Create Post - Mobile Only */}
+          {clubs.length > 0 && (
+            <div className="lg:hidden bg-white rounded-lg shadow p-4 space-y-4">
+              <div>
+                <label htmlFor="club-select-mobile" className="block text-sm font-medium text-gray-700 mb-2">
+                  Posting to:
+                </label>
+                <select
+                  id="club-select-mobile"
+                  value={selectedClubId}
+                  onChange={(e) => setSelectedClubId(e.target.value)}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                >
+                  {clubs.map((club) => (
+                    <option key={club.id} value={club.id}>
+                      {club.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <CreatePostForm onPostCreated={handlePostCreated} clubId={selectedClubId} />
+            </div>
+          )}
 
           {/* Mobile: Events & Reviews Tabs */}
           {(events.length > 0 || reviews.length > 0) && (
