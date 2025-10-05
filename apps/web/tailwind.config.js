@@ -36,6 +36,7 @@ export default {
       fontFamily: {
         sans: ['Inter', 'system-ui', 'sans-serif'],
         serif: ['Playfair Display', 'Georgia', 'serif'],
+        script: ['Dancing Script', 'cursive'],
       },
       animation: {
         'fade-in': 'fadeIn 0.2s ease-in',

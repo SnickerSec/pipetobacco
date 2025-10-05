@@ -151,7 +151,7 @@ export default function AuthenticatedLayout() {
           <div className="flex items-center justify-between h-16">
             {/* Logo */}
             <Link to="/feed" className="flex items-center space-x-2">
-              <span className="text-2xl text-ember-600 font-bold italic" style={{ fontFamily: "'Brush Script MT', 'Lucida Handwriting', cursive" }}>
+              <span className="text-3xl text-ember-600 font-script font-bold">
                 Herf Social
               </span>
             </Link>
