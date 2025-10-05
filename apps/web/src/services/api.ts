@@ -305,7 +305,10 @@ class ApiService {
   // Followers/Following
   async getFollowers(username: string, limit = 20, offset = 0): Promise<User[]> {
     const response = await fetch(
-      `${API_BASE_URL}/api/users/${username}/followers?limit=${limit}&offset=${offset}`
+      `${API_BASE_URL}/api/users/${username}/followers?limit=${limit}&offset=${offset}`,
+      {
+        headers: this.getAuthHeaders(),
+      }
     );
 
     if (!response.ok) {
@@ -317,7 +320,10 @@ class ApiService {
 
   async getFollowing(username: string, limit = 20, offset = 0): Promise<User[]> {
     const response = await fetch(
-      `${API_BASE_URL}/api/users/${username}/following?limit=${limit}&offset=${offset}`
+      `${API_BASE_URL}/api/users/${username}/following?limit=${limit}&offset=${offset}`,
+      {
+        headers: this.getAuthHeaders(),
+      }
     );
 
     if (!response.ok) {
