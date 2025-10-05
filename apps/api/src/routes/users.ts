@@ -180,9 +180,12 @@ router.get('/:username', authenticate, async (req: AuthRequest, res) => {
       },
     });
 
+    const isFollowing = !!followRelation;
+    console.log(`User ${currentUserId} viewing ${user.username} (${user.id}): isFollowing = ${isFollowing}`);
+
     res.json({
       ...user,
-      isFollowing: !!followRelation,
+      isFollowing,
     });
   } catch (error) {
     console.error('Error fetching user profile:', error);

@@ -48,8 +48,8 @@ export default function ProfilePage() {
       // Set following status from API response (unless we're preserving the current state)
       if (!preserveFollowState) {
         console.log('Profile data isFollowing:', profileData.isFollowing);
-        console.log('Setting isFollowing to:', profileData.isFollowing || false);
-        setIsFollowing(profileData.isFollowing || false);
+        console.log('Setting isFollowing to:', profileData.isFollowing ?? false);
+        setIsFollowing(profileData.isFollowing ?? false);
       } else {
         console.log('Preserving follow state, not updating from API');
       }
