@@ -305,17 +305,6 @@ export default function AuthenticatedLayout() {
             );
           })}
 
-          {/* Notifications */}
-          <Link
-            to="/notifications"
-            className={`flex flex-col items-center py-1 min-w-0 ${
-              isActive('/notifications') ? 'text-ember-600' : 'text-tobacco-600'
-            }`}
-          >
-            <BellIcon className="h-5 w-5 flex-shrink-0" />
-            <span className="text-[10px] mt-0.5 leading-tight truncate max-w-[60px]">Notifications</span>
-          </Link>
-
           {/* Profile Menu Button - Right */}
           <button
             onClick={() => setShowMobileMenu(true)}
@@ -350,6 +339,15 @@ export default function AuthenticatedLayout() {
 
               {/* Menu Items */}
               <nav className="space-y-1">
+                <Link
+                  to="/notifications"
+                  onClick={() => setShowMobileMenu(false)}
+                  className="flex items-center space-x-3 px-3 py-3 rounded-lg hover:bg-tobacco-50 text-tobacco-900"
+                >
+                  <BellIcon className="h-6 w-6" />
+                  <span className="font-medium">Notifications</span>
+                </Link>
+
                 <Link
                   to="/profile/me"
                   onClick={() => setShowMobileMenu(false)}
