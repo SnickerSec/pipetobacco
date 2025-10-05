@@ -29,6 +29,8 @@ export default function AuthenticatedLayout() {
   const [showUserMenu, setShowUserMenu] = useState(false);
   const searchRef = useRef<HTMLDivElement>(null);
   const userMenuRef = useRef<HTMLDivElement>(null);
+  const [touchStart, setTouchStart] = useState<number | null>(null);
+  const [touchEnd, setTouchEnd] = useState<number | null>(null);
 
   const isActive = (path: string) => location.pathname.startsWith(path);
 
@@ -102,6 +104,39 @@ export default function AuthenticatedLayout() {
     { path: '/events', icon: CalendarIcon, label: 'Events' },
     { path: '/messages', icon: ChatBubbleLeftIcon, label: 'Messages' },
   ];
+
+  // Swipe gesture handlers for page navigation
+  const minSwipeDistance = 50;
+
+  const onTouchStart = (e: React.TouchEvent) => {
+    setTouchEnd(null);
+    setTouchStart(e.targetTouches[0].clientX);
+  };
+
+  const onTouchMove = (e: React.TouchEvent) => {
+    setTouchEnd(e.targetTouches[0].clientX);
+  };
+
+  const onTouchEnd = () => {
+    if (!touchStart || !touchEnd) return;
+
+    const distance = touchStart - touchEnd;
+    const isLeftSwipe = distance > minSwipeDistance;
+    const isRightSwipe = distance < -minSwipeDistance;
+
+    // Find current page index
+    const currentIndex = navItems.findIndex(item => location.pathname.startsWith(item.path));
+
+    if (currentIndex === -1) return;
+
+    // Navigate to next/previous page
+    if (isLeftSwipe && currentIndex < navItems.length - 1) {
+      navigate(navItems[currentIndex + 1].path);
+    }
+    if (isRightSwipe && currentIndex > 0) {
+      navigate(navItems[currentIndex - 1].path);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-tobacco-50">
@@ -278,7 +313,12 @@ export default function AuthenticatedLayout() {
       </header>
 
       {/* Main Content - Add bottom padding on mobile for bottom nav, no top padding on mobile */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4 md:pt-8 pb-24 md:pb-8">
+      <main
+        className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4 md:pt-8 pb-24 md:pb-8"
+        onTouchStart={onTouchStart}
+        onTouchMove={onTouchMove}
+        onTouchEnd={onTouchEnd}
+      >
         <Outlet />
       </main>
 
