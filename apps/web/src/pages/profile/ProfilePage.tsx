@@ -16,6 +16,10 @@ export default function ProfilePage() {
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<'posts' | 'about'>('posts');
   const [showReportModal, setShowReportModal] = useState(false);
+  const [showFollowersModal, setShowFollowersModal] = useState(false);
+  const [showFollowingModal, setShowFollowingModal] = useState(false);
+  const [followers, setFollowers] = useState<User[]>([]);
+  const [following, setFollowing] = useState<User[]>([]);
 
   useEffect(() => {
     fetchProfileData();
@@ -89,6 +93,28 @@ export default function ProfilePage() {
 
   const handlePostDeleted = () => {
     fetchProfileData();
+  };
+
+  const handleShowFollowers = async () => {
+    if (!user) return;
+    try {
+      const followersList = await api.getFollowers(user.username);
+      setFollowers(followersList);
+      setShowFollowersModal(true);
+    } catch (err) {
+      console.error('Error fetching followers:', err);
+    }
+  };
+
+  const handleShowFollowing = async () => {
+    if (!user) return;
+    try {
+      const followingList = await api.getFollowing(user.username);
+      setFollowing(followingList);
+      setShowFollowingModal(true);
+    } catch (err) {
+      console.error('Error fetching following:', err);
+    }
   };
 
   if (loading) {
@@ -243,14 +269,20 @@ export default function ProfilePage() {
                       <span className="font-bold text-gray-900">{user._count?.posts || 0}</span>
                       <span className="text-gray-600 ml-1">Posts</span>
                     </div>
-                    <div className="cursor-pointer hover:text-orange-600">
+                    <button
+                      onClick={handleShowFollowers}
+                      className="cursor-pointer hover:text-orange-600 transition"
+                    >
                       <span className="font-bold text-gray-900">{user._count?.followers || 0}</span>
                       <span className="text-gray-600 ml-1">Followers</span>
-                    </div>
-                    <div className="cursor-pointer hover:text-orange-600">
+                    </button>
+                    <button
+                      onClick={handleShowFollowing}
+                      className="cursor-pointer hover:text-orange-600 transition"
+                    >
                       <span className="font-bold text-gray-900">{user._count?.following || 0}</span>
                       <span className="text-gray-600 ml-1">Following</span>
-                    </div>
+                    </button>
                   </div>
                 </div>
 
@@ -393,6 +425,144 @@ export default function ProfilePage() {
           reportedUserId={user.id}
           reportType="user"
         />
+      )}
+
+      {/* Followers Modal */}
+      {showFollowersModal && (
+        <div
+          className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
+          onClick={() => setShowFollowersModal(false)}
+        >
+          <div
+            className="bg-white rounded-lg max-w-md w-full max-h-[80vh] overflow-hidden"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="p-4 border-b border-gray-200">
+              <div className="flex items-center justify-between">
+                <h3 className="text-lg font-semibold text-gray-900">
+                  Followers ({followers.length})
+                </h3>
+                <button
+                  onClick={() => setShowFollowersModal(false)}
+                  className="text-gray-500 hover:text-gray-700"
+                >
+                  <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+            <div className="overflow-y-auto max-h-[60vh]">
+              {followers.length === 0 ? (
+                <div className="p-8 text-center text-gray-600">No followers yet</div>
+              ) : (
+                followers.map((follower) => (
+                  <Link
+                    key={follower.id}
+                    to={`/u/${follower.username}`}
+                    onClick={() => setShowFollowersModal(false)}
+                    className="flex items-center space-x-3 p-4 hover:bg-gray-50 transition"
+                  >
+                    <img
+                      src={
+                        follower.avatarUrl ||
+                        `https://ui-avatars.com/api/?name=${follower.displayName || follower.username}&size=40&background=ea580c&color=fff`
+                      }
+                      alt={follower.displayName || follower.username}
+                      className="h-10 w-10 rounded-full"
+                    />
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-1">
+                        <p className="text-sm font-medium text-gray-900 truncate">
+                          {follower.displayName || follower.username}
+                        </p>
+                        {follower.isVerified && (
+                          <svg className="h-4 w-4 text-blue-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                            <path
+                              fillRule="evenodd"
+                              d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                              clipRule="evenodd"
+                            />
+                          </svg>
+                        )}
+                      </div>
+                      <p className="text-sm text-gray-600">@{follower.username}</p>
+                    </div>
+                  </Link>
+                ))
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Following Modal */}
+      {showFollowingModal && (
+        <div
+          className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
+          onClick={() => setShowFollowingModal(false)}
+        >
+          <div
+            className="bg-white rounded-lg max-w-md w-full max-h-[80vh] overflow-hidden"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="p-4 border-b border-gray-200">
+              <div className="flex items-center justify-between">
+                <h3 className="text-lg font-semibold text-gray-900">
+                  Following ({following.length})
+                </h3>
+                <button
+                  onClick={() => setShowFollowingModal(false)}
+                  className="text-gray-500 hover:text-gray-700"
+                >
+                  <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+            <div className="overflow-y-auto max-h-[60vh]">
+              {following.length === 0 ? (
+                <div className="p-8 text-center text-gray-600">Not following anyone yet</div>
+              ) : (
+                following.map((followedUser) => (
+                  <Link
+                    key={followedUser.id}
+                    to={`/u/${followedUser.username}`}
+                    onClick={() => setShowFollowingModal(false)}
+                    className="flex items-center space-x-3 p-4 hover:bg-gray-50 transition"
+                  >
+                    <img
+                      src={
+                        followedUser.avatarUrl ||
+                        `https://ui-avatars.com/api/?name=${followedUser.displayName || followedUser.username}&size=40&background=ea580c&color=fff`
+                      }
+                      alt={followedUser.displayName || followedUser.username}
+                      className="h-10 w-10 rounded-full"
+                    />
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-1">
+                        <p className="text-sm font-medium text-gray-900 truncate">
+                          {followedUser.displayName || followedUser.username}
+                        </p>
+                        {followedUser.isVerified && (
+                          <svg className="h-4 w-4 text-blue-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                            <path
+                              fillRule="evenodd"
+                              d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                              clipRule="evenodd"
+                            />
+                          </svg>
+                        )}
+                      </div>
+                      <p className="text-sm text-gray-600">@{followedUser.username}</p>
+                    </div>
+                  </Link>
+                ))
+              )}
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );
