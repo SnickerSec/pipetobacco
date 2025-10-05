@@ -19,7 +19,7 @@ export default function ProfilePage() {
     fetchProfileData();
   }, [username]);
 
-  const fetchProfileData = async () => {
+  const fetchProfileData = async (preserveFollowState = false) => {
     if (!username) return;
 
     try {
@@ -45,8 +45,10 @@ export default function ProfilePage() {
       setCurrentUser(currentUserData);
       setPosts(userPosts);
 
-      // Set following status from API response
-      setIsFollowing(profileData.isFollowing || false);
+      // Set following status from API response (unless we're preserving the current state)
+      if (!preserveFollowState) {
+        setIsFollowing(profileData.isFollowing || false);
+      }
     } catch (err: any) {
       setError(err.message || 'Failed to load profile');
       console.error(err);
@@ -62,17 +64,20 @@ export default function ProfilePage() {
       if (isFollowing) {
         await api.unfollowUser(user.username);
         setIsFollowing(false);
+        // Refresh profile to update follower count (preserve follow state)
+        await fetchProfileData(true);
       } else {
         await api.followUser(user.username);
         setIsFollowing(true);
+        // Refresh profile to update follower count (preserve follow state)
+        await fetchProfileData(true);
       }
-      // Refresh profile to update follower count
-      fetchProfileData();
     } catch (err: any) {
       // Handle "already following" error by updating state
       if (err.message?.includes('Already following')) {
         setIsFollowing(true);
-        fetchProfileData();
+        // Refresh to update follower count but preserve our corrected follow state
+        await fetchProfileData(true);
       } else {
         alert(err.message || 'Failed to update follow status');
       }
