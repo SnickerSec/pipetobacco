@@ -75,6 +75,7 @@ export default function ProfilePage() {
     } catch (err: any) {
       // Handle "already following" error by updating state
       if (err.message?.includes('Already following')) {
+        console.log('Setting isFollowing to true due to "Already following" error');
         setIsFollowing(true);
         // Refresh to update follower count but preserve our corrected follow state
         await fetchProfileData(true);
