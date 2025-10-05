@@ -47,10 +47,9 @@ export default function ProfilePage() {
       setCurrentUser(currentUserData);
       setPosts(userPosts);
 
-      // Check if current user is following this profile
-      if (currentUserData) {
-        // TODO: Add API call to check follow status
-        setIsFollowing(false);
+      // Set following status from API response
+      if (currentUserData && profileData.isFollowing !== undefined) {
+        setIsFollowing(profileData.isFollowing);
       }
     } catch (err: any) {
       setError(err.message || 'Failed to load profile');
@@ -74,7 +73,17 @@ export default function ProfilePage() {
       // Refresh profile to update follower count
       fetchProfileData();
     } catch (err: any) {
-      alert(err.message || 'Failed to update follow status');
+      console.error('Follow/unfollow error:', err);
+
+      // Handle "already following" errors by syncing with server
+      const errorMsg = err.message?.toLowerCase() || '';
+      if (errorMsg.includes('already')) {
+        console.log('Syncing follow state with server due to error');
+        // Refresh to get the true follow status from server
+        await fetchProfileData();
+      } else {
+        alert(err.message || 'Failed to update follow status');
+      }
     }
   };
 
