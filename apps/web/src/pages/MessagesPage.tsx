@@ -35,6 +35,14 @@ interface Conversation {
     slug: string;
     avatarUrl: string | null;
   };
+  groupName?: string;
+  participants?: {
+    id: string;
+    username: string;
+    displayName: string | null;
+    avatarUrl: string | null;
+    isVerified: boolean;
+  }[];
   unreadCount?: number;
   lastMessageAt: string;
 }
