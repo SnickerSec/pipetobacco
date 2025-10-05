@@ -345,7 +345,7 @@ export default function MessagesPage() {
       </div>
 
       {/* Chat Area - Full width on mobile when viewing a conversation */}
-      <div className={`flex-1 flex flex-col bg-gray-50 ${
+      <div className={`flex-1 flex flex-col bg-gray-50 overflow-hidden ${
         !username ? 'hidden md:flex' : 'flex'
       }`}>
         {error ? (
