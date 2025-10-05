@@ -23,6 +23,7 @@ export default function FeedPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+  const [mobileTab, setMobileTab] = useState<'events' | 'reviews'>('events');
 
   const fetchData = async () => {
     try {
@@ -161,58 +162,100 @@ export default function FeedPage() {
           {/* Create Post */}
           <CreatePostForm onPostCreated={handlePostCreated} clubId={selectedClubId} />
 
-          {/* Mobile: Upcoming Events */}
-          {events.length > 0 && (
-            <div className="lg:hidden bg-white rounded-lg shadow p-4">
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-lg font-semibold text-gray-900">Upcoming Events</h2>
+          {/* Mobile: Events & Reviews Tabs */}
+          {(events.length > 0 || reviews.length > 0) && (
+            <div className="lg:hidden bg-white rounded-lg shadow">
+              {/* Tabs */}
+              <div className="flex border-b border-gray-200">
                 <button
-                  onClick={() => navigate('/events')}
-                  className="text-sm text-orange-600 hover:text-orange-700"
+                  onClick={() => setMobileTab('events')}
+                  className={`flex-1 px-4 py-3 text-sm font-medium border-b-2 transition-colors ${
+                    mobileTab === 'events'
+                      ? 'border-orange-500 text-orange-600'
+                      : 'border-transparent text-gray-500 hover:text-gray-700'
+                  }`}
                 >
-                  View All
+                  Upcoming Events
+                </button>
+                <button
+                  onClick={() => setMobileTab('reviews')}
+                  className={`flex-1 px-4 py-3 text-sm font-medium border-b-2 transition-colors ${
+                    mobileTab === 'reviews'
+                      ? 'border-orange-500 text-orange-600'
+                      : 'border-transparent text-gray-500 hover:text-gray-700'
+                  }`}
+                >
+                  Recent Reviews
                 </button>
               </div>
-              <EventCard event={events[0]} compact />
-            </div>
-          )}
 
-          {/* Mobile: Recent Reviews */}
-          {reviews.length > 0 && (
-            <div className="lg:hidden bg-white rounded-lg shadow p-4">
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-lg font-semibold text-gray-900">Recent Reviews</h2>
-                <button
-                  onClick={() => navigate('/reviews')}
-                  className="text-sm text-orange-600 hover:text-orange-700"
-                >
-                  View All
-                </button>
-              </div>
-              <div
-                onClick={() => navigate('/reviews')}
-                className="border border-gray-200 rounded-lg p-3 hover:border-orange-300 hover:shadow-sm transition cursor-pointer"
-              >
-                <div className="flex items-start justify-between mb-2">
-                  <h3 className="font-semibold text-gray-900 text-sm line-clamp-1">
-                    {reviews[0].productName}
-                  </h3>
-                  <div className="flex items-center gap-1 ml-2 flex-shrink-0">
-                    <svg className="w-4 h-4 text-yellow-400 fill-current" viewBox="0 0 20 20">
-                      <path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z" />
-                    </svg>
-                    <span className="text-sm font-medium text-gray-700">{reviews[0].rating}</span>
-                  </div>
-                </div>
-                <p className="text-xs text-gray-600 line-clamp-2 mb-2">{reviews[0].title}</p>
-                <div className="flex items-center gap-2 text-xs text-gray-500">
-                  <img
-                    src={reviews[0].author.avatarUrl || `https://ui-avatars.com/api/?name=${reviews[0].author.displayName || reviews[0].author.username}&size=20`}
-                    alt={reviews[0].author.username}
-                    className="w-5 h-5 rounded-full"
-                  />
-                  <span>by {reviews[0].author.displayName || reviews[0].author.username}</span>
-                </div>
+              {/* Tab Content */}
+              <div className="p-4">
+                {mobileTab === 'events' && (
+                  <>
+                    {events.length > 0 ? (
+                      <>
+                        <div className="flex items-center justify-between mb-4">
+                          <h2 className="text-lg font-semibold text-gray-900">Upcoming Events</h2>
+                          <button
+                            onClick={() => navigate('/events')}
+                            className="text-sm text-orange-600 hover:text-orange-700"
+                          >
+                            View All
+                          </button>
+                        </div>
+                        <EventCard event={events[0]} compact />
+                      </>
+                    ) : (
+                      <p className="text-sm text-gray-500 text-center py-4">No upcoming events</p>
+                    )}
+                  </>
+                )}
+
+                {mobileTab === 'reviews' && (
+                  <>
+                    {reviews.length > 0 ? (
+                      <>
+                        <div className="flex items-center justify-between mb-4">
+                          <h2 className="text-lg font-semibold text-gray-900">Recent Reviews</h2>
+                          <button
+                            onClick={() => navigate('/reviews')}
+                            className="text-sm text-orange-600 hover:text-orange-700"
+                          >
+                            View All
+                          </button>
+                        </div>
+                        <div
+                          onClick={() => navigate('/reviews')}
+                          className="border border-gray-200 rounded-lg p-3 hover:border-orange-300 hover:shadow-sm transition cursor-pointer"
+                        >
+                          <div className="flex items-start justify-between mb-2">
+                            <h3 className="font-semibold text-gray-900 text-sm line-clamp-1">
+                              {reviews[0].productName}
+                            </h3>
+                            <div className="flex items-center gap-1 ml-2 flex-shrink-0">
+                              <svg className="w-4 h-4 text-yellow-400 fill-current" viewBox="0 0 20 20">
+                                <path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z" />
+                              </svg>
+                              <span className="text-sm font-medium text-gray-700">{reviews[0].rating}</span>
+                            </div>
+                          </div>
+                          <p className="text-xs text-gray-600 line-clamp-2 mb-2">{reviews[0].title}</p>
+                          <div className="flex items-center gap-2 text-xs text-gray-500">
+                            <img
+                              src={reviews[0].author.avatarUrl || `https://ui-avatars.com/api/?name=${reviews[0].author.displayName || reviews[0].author.username}&size=20`}
+                              alt={reviews[0].author.username}
+                              className="w-5 h-5 rounded-full"
+                            />
+                            <span>by {reviews[0].author.displayName || reviews[0].author.username}</span>
+                          </div>
+                        </div>
+                      </>
+                    ) : (
+                      <p className="text-sm text-gray-500 text-center py-4">No reviews yet</p>
+                    )}
+                  </>
+                )}
               </div>
             </div>
           )}
