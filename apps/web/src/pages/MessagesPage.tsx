@@ -433,8 +433,8 @@ export default function MessagesPage() {
               </div>
             </div>
 
-            {/* Messages */}
-            <div className="flex-1 overflow-y-auto p-2 md:p-4 space-y-2 md:space-y-4">
+            {/* Messages - scrollable area that doesn't include the input */}
+            <div className="flex-1 overflow-y-auto p-2 md:p-4 space-y-2 md:space-y-4 pb-2">
               {currentConversation.messages.length === 0 ? (
                 <div className="text-center text-gray-500 py-8">
                   <p>No messages yet. Say hello!</p>
@@ -487,8 +487,8 @@ export default function MessagesPage() {
               <div ref={messagesEndRef} />
             </div>
 
-            {/* Message Input */}
-            <div className="bg-white border-t border-gray-200 p-4">
+            {/* Message Input - fixed at bottom, above navigation bar on mobile */}
+            <div className="bg-white border-t border-gray-200 p-3 md:p-4 flex-shrink-0">
               <form onSubmit={handleSendMessage} className="flex space-x-2">
                 <input
                   type="text"
@@ -501,7 +501,7 @@ export default function MessagesPage() {
                 <button
                   type="submit"
                   disabled={isSending || !newMessage.trim()}
-                  className="px-6 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="px-4 md:px-6 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 disabled:opacity-50 disabled:cursor-not-allowed flex-shrink-0"
                 >
                   {isSending ? 'Sending...' : 'Send'}
                 </button>
