@@ -69,7 +69,13 @@ export default function ProfilePage() {
       // Refresh profile to update follower count
       fetchProfileData();
     } catch (err: any) {
-      alert(err.message || 'Failed to update follow status');
+      // Handle "already following" error by updating state
+      if (err.message?.includes('Already following')) {
+        setIsFollowing(true);
+        fetchProfileData();
+      } else {
+        alert(err.message || 'Failed to update follow status');
+      }
     }
   };
 
