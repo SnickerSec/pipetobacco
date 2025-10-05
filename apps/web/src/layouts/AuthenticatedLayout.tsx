@@ -139,7 +139,12 @@ export default function AuthenticatedLayout() {
   };
 
   return (
-    <div className="min-h-screen bg-tobacco-50">
+    <div
+      className="min-h-screen bg-tobacco-50"
+      onTouchStart={onTouchStart}
+      onTouchMove={onTouchMove}
+      onTouchEnd={onTouchEnd}
+    >
       {/* Top Navigation (Desktop Only) */}
       <header className="hidden md:block bg-white shadow-sm border-b border-tobacco-200 sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -313,12 +318,7 @@ export default function AuthenticatedLayout() {
       </header>
 
       {/* Main Content - Add bottom padding on mobile for bottom nav, no top padding on mobile */}
-      <main
-        className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4 md:pt-8 pb-24 md:pb-8"
-        onTouchStart={onTouchStart}
-        onTouchMove={onTouchMove}
-        onTouchEnd={onTouchEnd}
-      >
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4 md:pt-8 pb-24 md:pb-8">
         <Outlet />
       </main>
 
