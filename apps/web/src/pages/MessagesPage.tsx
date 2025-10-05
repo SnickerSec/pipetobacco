@@ -441,7 +441,7 @@ export default function MessagesPage() {
                 </div>
               ) : (
                 currentConversation.messages.map((message, index) => {
-                  const isCurrentUser = message.sender.id === message.senderId;
+                  const isCurrentUser = currentUser && message.senderId === currentUser.id;
                   const showAvatar =
                     index === 0 ||
                     currentConversation.messages[index - 1].senderId !== message.senderId;

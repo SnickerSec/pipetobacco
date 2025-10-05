@@ -182,10 +182,10 @@ export default function EventsPage() {
       case 'past':
         return events.filter(event => new Date(event.startTime) < now);
       case 'my':
-        // Filter events where user has RSVP'd with status 'GOING'
+        // Filter events where user has RSVP'd with status 'GOING' and exclude past events
         return events.filter(event => {
           const userRsvp = event.rsvps.find((rsvp: any) => rsvp.userId === currentUserId);
-          return userRsvp?.status === 'GOING';
+          return userRsvp?.status === 'GOING' && new Date(event.startTime) >= now;
         });
       default:
         return events;
