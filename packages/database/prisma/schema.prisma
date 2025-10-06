@@ -71,6 +71,9 @@ model User {
   reportsReceived         Report[]                  @relation("Reported")
   pushSubscriptions       PushSubscription[]
   notificationPreferences NotificationPreference?
+  hostedHerfSessions      HerfSession[]             @relation("HerfHost")
+  herfParticipations      HerfParticipant[]         @relation("HerfParticipants")
+  herfMessages            HerfChatMessage[]         @relation("HerfMessages")
 
   @@index([email])
   @@index([username])
@@ -137,6 +140,7 @@ model Club {
   events      Event[]
   invitations ClubInvite[]
   reviews     Review[]
+  herfSessions HerfSession[]
 
   @@index([creatorId])
   @@index([slug])
@@ -571,6 +575,80 @@ model Review {
   @@index([clubId])
   @@index([category])
   @@index([rating])
+  @@index([createdAt])
+}
+
+// ============================================================================
+// VIRTUAL HERF SESSIONS
+// ============================================================================
+
+enum HerfStatus {
+  SCHEDULED
+  LIVE
+  ENDED
+  CANCELLED
+}
+
+model HerfSession {
+  id              String   @id @default(cuid())
+  title           String
+  description     String?  @db.Text
+  hostId          String
+  roomUrl         String?  // Daily.co room URL
+  roomName        String?  // Daily.co room name
+  maxParticipants Int      @default(8)
+  scheduledFor    DateTime?
+  startedAt       DateTime?
+  endedAt         DateTime?
+  isPrivate       Boolean  @default(false)
+  status          HerfStatus @default(SCHEDULED)
+
+  // Optional club association
+  clubId          String?
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  // Relations
+  host            User     @relation("HerfHost", fields: [hostId], references: [id], onDelete: Cascade)
+  club            Club?    @relation(fields: [clubId], references: [id], onDelete: Cascade)
+  participants    HerfParticipant[]
+  messages        HerfChatMessage[]
+
+  @@index([hostId])
+  @@index([clubId])
+  @@index([status])
+  @@index([scheduledFor])
+  @@index([createdAt])
+}
+
+model HerfParticipant {
+  id        String      @id @default(cuid())
+  sessionId String
+  userId    String
+  joinedAt  DateTime    @default(now())
+  leftAt    DateTime?
+
+  session   HerfSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  user      User        @relation("HerfParticipants", fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([sessionId, userId])
+  @@index([sessionId])
+  @@index([userId])
+}
+
+model HerfChatMessage {
+  id        String      @id @default(cuid())
+  sessionId String
+  userId    String
+  message   String      @db.Text
+  createdAt DateTime    @default(now())
+
+  session   HerfSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  user      User        @relation("HerfMessages", fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([sessionId])
+  @@index([userId])
   @@index([createdAt])
 }
 

@@ -11,6 +11,7 @@ import {
   StarIcon,
   ArrowRightOnRectangleIcon,
   Cog6ToothIcon,
+  VideoCameraIcon,
 } from '@heroicons/react/24/outline';
 import NotificationPermissionPrompt from '../components/NotificationPermissionPrompt';
 import { api } from '../services/api';
@@ -102,6 +103,7 @@ export default function AuthenticatedLayout() {
     { path: '/clubs', icon: UsersIcon, label: 'Clubs' },
     { path: '/reviews', icon: StarIcon, label: 'Reviews' },
     { path: '/events', icon: CalendarIcon, label: 'Events' },
+    { path: '/herf', icon: VideoCameraIcon, label: 'Herf Sessions' },
     { path: '/messages', icon: ChatBubbleLeftIcon, label: 'Messages' },
   ];
 

@@ -34,6 +34,8 @@ import UserProfilePage from './pages/profile/ProfilePage';
 import ProfileSettingsPage from './pages/settings/ProfileSettingsPage';
 import NotificationSettingsPage from './pages/settings/NotificationSettingsPage';
 import ReviewsPage from './pages/ReviewsPage';
+import HerfSessions from './pages/HerfSessions';
+import HerfSessionPage from './pages/HerfSessionPage';
 
 function App() {
   return (
@@ -69,6 +71,8 @@ function App() {
               <Route path="/events" element={<EventsPage />} />
               <Route path="/events/:id" element={<EventDetailPage />} />
               <Route path="/reviews" element={<ReviewsPage />} />
+              <Route path="/herf" element={<HerfSessions />} />
+              <Route path="/herf/:sessionId" element={<HerfSessionPage />} />
               <Route path="/messages" element={<MessagesPage />} />
               <Route path="/messages/:username" element={<MessagesPage />} />
               <Route path="/notifications" element={<NotificationsPage />} />

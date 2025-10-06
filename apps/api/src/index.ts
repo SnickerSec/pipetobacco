@@ -13,11 +13,13 @@ console.log('📝 .env loaded:', !result.error);
 if (result.error) console.error('.env error:', result.error);
 
 import express from 'express';
+import { createServer } from 'http';
 import cors from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
 import passport, { initializePassport } from './config/passport.js';
 import { startEventReminderScheduler } from './services/eventReminderService.js';
+import { initializeHerfSocket } from './socket/herfSocket.js';
 
 // Initialize Passport strategies after env vars are loaded
 initializePassport();
@@ -26,7 +28,11 @@ initializePassport();
 startEventReminderScheduler();
 
 const app = express();
+const httpServer = createServer(app);
 const PORT = process.env.PORT || 3000;
+
+// Initialize Socket.io for herf sessions
+initializeHerfSocket(httpServer);
 
 // Middleware
 app.use(helmet({
@@ -93,6 +99,10 @@ app.use('/api/reviews', reviewRoutes);
 const reportRoutes = (await import('./routes/reports.js')).default;
 app.use('/api/reports', reportRoutes);
 
+// Herf session routes
+const herfRoutes = (await import('./routes/herf.js')).default;
+app.use('/api/herf', herfRoutes);
+
 // Serve uploaded files statically with CORS headers
 app.use('/uploads', (req, res, next) => {
   res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
@@ -100,6 +110,7 @@ app.use('/uploads', (req, res, next) => {
   next();
 }, express.static(path.join(__dirname, '../uploads')));
 
-app.listen(PORT, () => {
+httpServer.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`);
+  console.log(`🔌 Socket.io initialized for herf sessions`);
 });
