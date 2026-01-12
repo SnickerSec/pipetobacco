@@ -31,7 +31,7 @@
     "passport-local": "^1.0.0",
     "socket.io": "^4.8.3",
     "web-push": "^3.6.7",
-    "zod": "^4.2.1"
+    "zod": "^4.3.5"
   },
   "devDependencies": {
     "@types/bcrypt": "^6.0.0",
