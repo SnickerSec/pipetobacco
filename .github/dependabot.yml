@@ -1,6 +1,26 @@
 version: 2
 updates:
-  # Root package.json and lockfile
+  # Security updates - runs daily for fast patching
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "daily"
+      time: "06:00"
+      timezone: "America/New_York"
+    open-pull-requests-limit: 20
+    groups:
+      security-patches:
+        applies-to: security-updates
+        patterns:
+          - "*"
+    commit-message:
+      prefix: "fix(security)"
+    labels:
+      - "security"
+      - "automated"
+      - "auto-merge"
+
+  # Regular version updates - weekly
   - package-ecosystem: "npm"
     directory: "/"
     schedule:
@@ -11,6 +31,7 @@ updates:
     open-pull-requests-limit: 10
     groups:
       npm_and_yarn:
+        applies-to: version-updates
         patterns:
           - "*"
     commit-message:

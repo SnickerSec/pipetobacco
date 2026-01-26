@@ -1,0 +1,80 @@
+name: Security Auto-Fix
+
+on:
+  schedule:
+    # Run daily at 5 AM UTC (before Dependabot runs)
+    - cron: "0 5 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  auto-fix-vulnerabilities:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Check for vulnerabilities
+        id: audit
+        run: |
+          npm audit --json > audit-before.json 2>/dev/null || true
+          VULN_COUNT=$(cat audit-before.json | jq '.metadata.vulnerabilities.total // 0')
+          echo "vulnerabilities=$VULN_COUNT" >> $GITHUB_OUTPUT
+          echo "Found $VULN_COUNT vulnerabilities"
+
+      - name: Run npm audit fix
+        if: steps.audit.outputs.vulnerabilities > 0
+        run: |
+          npm audit fix --force 2>&1 || true
+
+      - name: Check if fixes were applied
+        id: changes
+        run: |
+          if git diff --quiet package-lock.json; then
+            echo "has_changes=false" >> $GITHUB_OUTPUT
+          else
+            echo "has_changes=true" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Verify build still works
+        if: steps.changes.outputs.has_changes == 'true'
+        run: |
+          npm ci
+          npm run build --workspaces --if-present
+
+      - name: Create Pull Request
+        if: steps.changes.outputs.has_changes == 'true'
+        uses: peter-evans/create-pull-request@v6
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: "fix(security): auto-fix npm audit vulnerabilities"
+          title: "fix(security): Auto-fix npm audit vulnerabilities"
+          body: |
+            ## Automated Security Fix
+
+            This PR was automatically created by the security auto-fix workflow.
+
+            ### Changes
+            - Ran `npm audit fix --force` to patch known vulnerabilities
+
+            ### Verification
+            - ✅ Build completed successfully after fixes
+
+            ---
+            🤖 This PR will be auto-merged if CI passes.
+          branch: security/auto-fix-vulnerabilities
+          delete-branch: true
+          labels: |
+            security
+            automated
+            auto-merge
